@@ -10,6 +10,6 @@ Ability to create custom colliders for splits
 
 Ability to create condition-based splits
 
-Abiltiy to combine both
+Ability to combine both
 
 A quick-restart keybind that starts you back at the very beginning
