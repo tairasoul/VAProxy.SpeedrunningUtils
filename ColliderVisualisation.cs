@@ -20,7 +20,14 @@ namespace SpeedrunningUtils
 
         private void Update()
         {
-            DrawTrail();
+            if (Plugin.VisualisingHitboxes)
+            {
+                DrawTrail();
+            }
+            else
+            {
+                Destroy(this);
+            }
         }
 
         private void DrawTrail()
