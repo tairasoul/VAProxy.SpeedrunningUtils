@@ -6,22 +6,60 @@ using Newtonsoft.Json.Linq;
 using System.Collections;
 using BepInEx;
 using System.Reflection;
+using SettingsAPI;
+using System.Collections.Generic;
 
 namespace SpeedrunningUtils
 {
+    internal static class ObjectExtensions
+    {
+        internal static object GetFieldOrPropertyValue(this object obj, string fieldNameOrPropertyName)
+        {
+            if (obj == null)
+            {
+                return null;
+            }
+            try
+            {
+                Type objType = obj.GetType();
+                // Attempt to get the field
+                FieldInfo[] fields = objType.GetFields();
+                foreach (FieldInfo field in fields)
+                {
+                    if (field.Name == fieldNameOrPropertyName)
+                    {
+                        return field.GetValue(obj);
+                    }
+                }
+
+                // Attempt to get the property
+                PropertyInfo[] properties = objType.GetProperties();
+                foreach (PropertyInfo property in properties)
+                {
+                    if (property.Name == fieldNameOrPropertyName)
+                    {
+                        return property.GetValue(obj);
+                    }
+                }
+                Plugin.Log.LogError($"Field or Property '{fieldNameOrPropertyName}' not found in {objType.FullName}.");
+            }
+            catch (Exception ex)
+            {
+                // If neither field nor property found
+                Plugin.Log.LogError($"Error retrieving {fieldNameOrPropertyName}: {ex.Message}.");
+                return null; // or throw the exception further
+            }
+            return null;
+        }
+    }
     internal class SpeedrunnerUtils : MonoBehaviour
     {
         private string CurrentScene = "Intro";
-        private bool Cutscene4WasActive = false;
-        private bool TimerStarted = false;
-        private bool Cutscene6WasActive = false;
-        private BoxCollider[] Colliders = [];
         private Vector3 ColliderStart;
-        public static CustomSplit[] splits = [];
+        internal static CustomSplit[] splits = [];
         private int SplitIndex = 0;
-        private bool Cutscene6Split = false;
-        public static Condition[] Conditions = Array.Empty<Condition>();
-        public static string SplitPath = Path.Combine(Paths.ConfigPath, "Splits.json");
+        internal static Condition[] Conditions = [];
+        internal static string SplitPath = Path.Combine(Paths.ConfigPath, "Splits.json");
 
         private void Awake()
         {
@@ -39,66 +77,21 @@ namespace SpeedrunningUtils
             }
         }
 
-        private void StartAddingCollider()
-        {
-            GameObject Sen = GameObject.Find("S-105");
-            ColliderStart = Sen.transform.position;
-            GameObject Collider = new($"Collider {Colliders.Length + 1}");
-            Collider.AddComponent<VisualiserComponent>();
-            Collider.AddComponent<BoxCollider>();
-        }
-
-        private IEnumerator ColliderUpdate(GameObject coll)
-        {
-            BoxCollider collider = coll.GetComponent<BoxCollider>();
-            while (true)
-            {
-                if (UnityInput.Current.GetKeyDown(KeyCode.F8)) break;
-                yield return null;
-            }
-        }
-
         private void Update()
         {
             if (CurrentScene != "Intro" && CurrentScene != "Menu")
             {
-                /*GameObject Director = GameObject.Find("Director");
-                GameObject Cutscene4 = Director?.transform.Find("Cutscene4")?.gameObject;
-                if (Cutscene4 != null)
-                {
-                    if (Cutscene4.activeSelf) Cutscene4WasActive = true;
-                    if (!Cutscene4.activeSelf && Cutscene4WasActive && !TimerStarted)
-                    {
-                        Plugin.Log.LogInfo("Starting LiveSplit timer.");
-                        TimerStarted = true;
-                        Livesplit.SendCommand("starttimer\r\n");
-                    }
-                }
-                GameObject Cutscene6 = Director?.transform.Find("Cutscene6")?.gameObject;
-                if (Cutscene6 != null)
-                {
-                    if (Cutscene6.activeSelf)
-                    {
-                        Cutscene6WasActive = true;
-                    }
-                    if (!Cutscene6.activeSelf && Cutscene6WasActive && !Cutscene6Split)
-                    {
-                        Cutscene6Split = true;
-                        Livesplit.SendCommand("split\r\n");
-                        SplitIndex++;
-                    }
-                }*/
                 CustomSplit split = splits[SplitIndex];
                 if (split.condition != null)
                 {
                     bool fulfilled = split.condition.Fulfilled();
-                    if (split.collider != null)
+                    if (split.bounds != null)
                     {
-                        if (fulfilled && split.collider.bounds.Contains(GameObject.Find("S-105").transform.position)) {
-                            if (split.shouldSplitHere)
+                        if (fulfilled && split.bounds.Value.Contains(GameObject.Find("S-105").transform.position)) {
+                            if (split.shouldSplitHere || split.finalSplit)
                             {
                                 Plugin.Log.LogInfo("Splitting at split " + split.SplitName);
-                                Livesplit.SendCommand("split\r\n");
+                                Livesplit.SendCommand("startorsplit\r\n");
                             }
                             SplitIndex++;
                         }
@@ -107,10 +100,10 @@ namespace SpeedrunningUtils
                     {
                         if (fulfilled)
                         {
-                            if (split.shouldSplitHere)
+                            if (split.shouldSplitHere || split.finalSplit)
                             {
                                 Plugin.Log.LogInfo("Splitting at split " + split.SplitName);
-                                Livesplit.SendCommand("split\r\n");
+                                Livesplit.SendCommand("startorsplit\r\n");
                             }
                             SplitIndex++;
                         }
@@ -118,12 +111,12 @@ namespace SpeedrunningUtils
                 }
                 else
                 {
-                    if (split.collider.bounds.Contains(GameObject.Find("S-105").transform.position))
+                    if (split.bounds.Value.Contains(GameObject.Find("S-105").transform.position))
                     {
-                        if (split.shouldSplitHere)
+                        if (split.shouldSplitHere || split.finalSplit)
                         {
                             Plugin.Log.LogInfo("Splitting at split " + split.SplitName);
-                            Livesplit.SendCommand("split\r\n");
+                            Livesplit.SendCommand("startorsplit\r\n");
                         }
                         SplitIndex++;
                     }
@@ -132,14 +125,15 @@ namespace SpeedrunningUtils
         }
     }
 
-    public class Condition
+    internal class Condition
     {
-        public string Name;
-        public string Path;
-        public string Property;
-        public string Value;
-        public string ValueType;
-        public string Comparison;
+        internal string Name;
+        internal string Path;
+        internal string Property;
+        internal string Value;
+        internal string ValueType;
+        internal string Comparison;
+        internal string? Component;
         private T ParseValue<T>(object value)
         {
             // Parse based on the type T
@@ -165,58 +159,99 @@ namespace SpeedrunningUtils
             }
         }
 
-        public bool Fulfilled()
+        internal bool Fulfilled()
         {
-            if (Path.Contains("."))
+            if (Component != null)
             {
-                GameObject @object = GameObject.Find(Path.Split(char.Parse("."))[0]);
-                Component component = @object.GetComponent(Path.Split(char.Parse("."))[1]);
-                object parsed = "";
-                Type type = typeof(int);
-                switch(ValueType)
+                try
                 {
-                    case "float":
-                        parsed = ParseValue<float>(Value);
-                        type = typeof(float);
-                        break;
-                    case "int":
-                        parsed = ParseValue<int>(Value);
-                        type = typeof(int);
-                        break;
-                    case "bool":
-                        parsed = ParseValue<bool>(Value);
-                        type = typeof(bool);
-                        break;
-                    case "string":
-                        parsed = ParseValue<string>(Value);
-                        type = typeof(string);
-                        break;
+                    string[] splits = Path.Split("/".ToCharArray());
+                    GameObject obj = GameObject.Find(splits[0]);
+                    for (int i = 1; i < splits.Length; i++)
+                    {
+                        obj = obj.Find(splits[i]);
+                    }
+                    Component component = obj.GetComponent(Component);
+                    object parsed = "";
+                    Type type = typeof(int);
+                    switch (ValueType)
+                    {
+                        case "float":
+                            parsed = ParseValue<float>(Value);
+                            type = typeof(float);
+                            break;
+                        case "int":
+                            parsed = ParseValue<int>(Value);
+                            type = typeof(int);
+                            break;
+                        case "bool":
+                            parsed = ParseValue<bool>(Value);
+                            type = typeof(bool);
+                            break;
+                        case "string":
+                            parsed = ParseValue<string>(Value);
+                            type = typeof(string);
+                            break;
 
-                }
-                object fieldValue = component.GetType().GetField(Property).GetValue(component);
+                    }
+                    object fieldValue = null;
+                    try
+                    {
+                        Type objType = obj.GetType();
+                        // Attempt to get the field
+                        FieldInfo[] fields = objType.GetFields();
+                        foreach (FieldInfo field in fields)
+                        {
+                            if (field.Name == Property)
+                            {
+                                fieldValue = field.GetValue(obj);
+                            }
+                        }
 
-                if (fieldValue != null && fieldValue.GetType() == type)
-                {
-                    object convertedParsed = Convert.ChangeType(parsed, type);
+                        // Attempt to get the property
+                        PropertyInfo[] properties = objType.GetProperties();
+                        foreach (PropertyInfo property in properties)
+                        {
+                            if (property.Name == Property)
+                            {
+                                fieldValue = property.GetValue(obj);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Plugin.Log.LogError(ex);
+                    }
+
+                    if (fieldValue != null && fieldValue.GetType() == type)
+                    {
+                        object convertedParsed = Convert.ChangeType(parsed, type);
 
 #pragma warning disable CS8509 // The switch expression does not handle all possible values of its input type (it is not exhaustive).
-                    return Comparison switch
-                    {
-                        "==" => fieldValue.Equals(convertedParsed),
-                        "<" => Comparer.Default.Compare(fieldValue, convertedParsed) < 0,
-                        ">" => Comparer.Default.Compare(fieldValue, convertedParsed) > 0,
-                        ">=" => Comparer.Default.Compare(fieldValue, convertedParsed) >= 0,
-                        "<=" => Comparer.Default.Compare(fieldValue, convertedParsed) <= 0
-                    };
+                        return Comparison switch
+                        {
+                            "==" => fieldValue.Equals(convertedParsed),
+                            "<" => Comparer.Default.Compare(fieldValue, convertedParsed) < 0,
+                            ">" => Comparer.Default.Compare(fieldValue, convertedParsed) > 0,
+                            ">=" => Comparer.Default.Compare(fieldValue, convertedParsed) >= 0,
+                            "<=" => Comparer.Default.Compare(fieldValue, convertedParsed) <= 0
+                        };
 #pragma warning restore CS8509 // The switch expression does not handle all possible values of its input type (it is not exhaustive).
+                    }
                 }
+                catch { }
                 return false;
             }
             else
             {
                 try
                 {
-                    GameObject @object = GameObject.Find(Path);
+                    string[] splits = Path.Split("/".ToCharArray());
+                    GameObject obj = GameObject.Find(splits[0]);
+                    for (int i = 1; i < splits.Length; i++)
+                    {
+                        obj = obj.Find(splits[i]);
+                    }
                     object parsed = "";
                     Type type = typeof(int);
                     switch (ValueType)
@@ -238,26 +273,39 @@ namespace SpeedrunningUtils
                             type = typeof(string);
                             break;
                     }
-                    Plugin.Log.LogInfo($"Getting {Property} on {@object}");
-                    FieldInfo info = @object.GetType().GetField(Property, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-                    Plugin.Log.LogInfo($"FieldInfo gotten, {info}. Getting value.");
-                    object fieldValue = info.GetValue(@object);
-                    Plugin.Log.LogInfo($"Got {Property} on {@object}");
+                    //PropertyInfo info = obj.GetType().GetProperty(Property);
+                    //object fieldValue = info.GetValue(obj);
+                    object fieldValue = null;
+                    try
+                    {
+                        Type objType = obj.GetType();
+                        // Attempt to get the field
+                        FieldInfo[] fields = objType.GetFields();
+                        foreach (FieldInfo field in fields)
+                        {
+                            if (field.Name == Property)
+                            {
+                                fieldValue = field.GetValue(obj);
+                            }
+                        }
 
+                        // Attempt to get the property
+                        PropertyInfo[] properties = objType.GetProperties();
+                        foreach (PropertyInfo property in properties)
+                        {
+                            if (property.Name == Property)
+                            {
+                                fieldValue = property.GetValue(obj);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Plugin.Log.LogError(ex);
+                    }
                     if (fieldValue != null && fieldValue.GetType() == type)
                     {
                         object convertedParsed = Convert.ChangeType(parsed, type);
-
-                        bool returnVal = Comparison switch
-                        {
-                            "==" => fieldValue.Equals(convertedParsed),
-                            "<" => Comparer.Default.Compare(fieldValue, convertedParsed) < 0,
-                            ">" => Comparer.Default.Compare(fieldValue, convertedParsed) > 0,
-                            ">=" => Comparer.Default.Compare(fieldValue, convertedParsed) >= 0,
-                            "<=" => Comparer.Default.Compare(fieldValue, convertedParsed) <= 0
-                        };
-
-                        Plugin.Log.LogInfo($"return value for comparison {Property} {Comparison} {Value} is {returnVal}");
 
 #pragma warning disable CS8509 // The switch expression does not handle all possible values of its input type (it is not exhaustive).
                         return Comparison switch
@@ -271,10 +319,7 @@ namespace SpeedrunningUtils
 #pragma warning restore CS8509 // The switch expression does not handle all possible values of its input type (it is not exhaustive).
                     }
                 }
-                catch (Exception e)
-                {
-                    Plugin.Log.LogError(e);
-                }
+                catch { }
                 return false;
             }
         }
@@ -282,13 +327,20 @@ namespace SpeedrunningUtils
 
     internal class SplitLoader
     {
-        public static Condition ParseCondition(JToken condition)
+        internal static Condition ParseCondition(JToken condition)
         {
             if (condition == null) return null;
+            string comp = null;
+            try
+            {
+                comp = (string)condition["Component"];
+            }
+            catch { }
             Condition cond = new()
             {
                 Name = (string)condition["Name"],
                 Path = (string)condition["Path"],
+                Component = comp,
                 Property = (string)condition["Property"],
                 Value = (string)condition["Value"],
                 ValueType = (string)condition["ValueType"],
@@ -297,7 +349,7 @@ namespace SpeedrunningUtils
             return cond;
         }
 
-        public static Condition[] ParseConditionArray(JArray Conditions)
+        internal static Condition[] ParseConditionArray(JArray Conditions)
         {
             Condition[] conditions = [];
             foreach (JToken cond in Conditions)
@@ -307,37 +359,91 @@ namespace SpeedrunningUtils
             return conditions;
         }
 
-        public static Vector3 ParseVector(string vector)
+        internal static Vector3 ParseVector(string vector)
         {
             string[] parts = vector.Split(char.Parse(" "));
             return new Vector3(float.Parse(parts[0]), float.Parse(parts[1]), float.Parse(parts[2]));
         }
 
-        public static BoxCollider ParseCollider(JToken collider)
+        internal static Bounds? ParseBounds(JToken collider)
         {
             if (collider == null) return null;
-            GameObject colliderObject = new((string)collider["name"]);
-            BoxCollider coll = colliderObject.AddComponent<BoxCollider>();
-            coll.transform.SetParent(Plugin.ColliderStorage.transform);
-            coll.size = ParseVector((string)collider["size"]);
-            coll.transform.position = ParseVector((string)collider["transform"]);
+            Bounds coll = new(ParseVector((string)collider["center"]), ParseVector((string)collider["size"]));
+            Plugin.Visualiser.AddBounds(coll);
             return coll;
         }
 
-        public static string ParseColliderToJson(BoxCollider collider)
+        internal static string ParseBoundsToJson(Bounds bounds)
         {
-            return $"{{ \"size\": \"{collider.size.x} {collider.size.y} {collider.size.z}\", \"transform\": \"{collider.transform.position.x} {collider.transform.position.y} {collider.transform.position.z}\"}}";
+            return $"{{ \"size\": \"{bounds.size.x} {bounds.size.y} {bounds.size.z}\", \"center\": \"{bounds.center.x} {bounds.center.y} {bounds.center.z}\"}}";
         }
         
-        public static string ParseConditionToJson(Condition condition)
+        internal static string ParseConditionToJson(Condition condition)
         {
             return $"{{ \"Name\": \"{condition.Name}\", \"Path\": \"{condition.Path}\", \"Property\": \"{condition.Property}\", \"Value\": \"{condition.Value}\", \"ValueType\": \"{condition.ValueType}\", \"Comparison\": \"{condition.Comparison}\"";
         }
-        public static void LoadSplits()
+        internal static void LoadSplits()
         {
             if (!File.Exists(SpeedrunnerUtils.SplitPath))
             {
-                string baseData = @"[]";
+                string baseData = @"[
+                {
+                    ""SplitName"": ""PreStart Split"",
+                    ""condition"": {
+                        ""Name"": ""WasCutsceneActive"",
+                        ""Path"": ""Director/Cutscene4"",
+                        ""Property"": ""activeSelf"",
+                        ""Value"": ""true"",
+                        ""ValueType"": ""bool"",
+                        ""Comparison"": ""==""
+                    },
+                    ""shouldSplitHere"": ""false""
+                },
+                {
+                    ""SplitName"": ""Spawn"",
+                    ""condition"": {
+                        ""Name"": ""CutsceneNotActive"",
+                        ""Path"": ""Director/Cutscene4"",
+                        ""Property"": ""activeSelf"",
+                        ""Value"": ""false"",
+                        ""ValueType"": ""bool"",
+                        ""Comparison"": ""==""
+                    },
+                    ""shouldSplitHere"": ""true""
+                },
+                {
+                    ""SplitName"": ""DropCutscene-Pre"",
+                    ""condition"": {
+                        ""Name"": ""WasCutsceneActive"",
+                        ""Path"": ""Director/Cutscene6"",
+                        ""Property"": ""activeSelf"",
+                        ""Value"": ""true"",
+                        ""ValueType"": ""bool"",
+                        ""Comparison"": ""==""
+                    },
+                    ""shouldSplitHere"": ""false""
+                },
+                {
+                    ""SplitName"": ""Drop"",
+                    ""condition"": {
+                        ""Name"": ""CutsceneNotActive"",
+                        ""Path"": ""Director/Cutscene6"",
+                        ""Property"": ""activeSelf"",
+                        ""Value"": ""false"",
+                        ""ValueType"": ""bool"",
+                        ""Comparison"": ""==""
+                    },
+                    ""shouldSplitHere"": ""true""
+                },
+                {
+                    ""SplitName"": ""Scrap Pits"",
+                    ""bounds"": {
+                        ""center"": ""4049.9 10501.425 374.2478"",
+                        ""size"": ""25.748 2 21.6042""
+                    },
+                    ""shouldSplitHere"": ""true""
+                }
+            ]";
 
                 // Create or overwrite the file with the base data
                 using StreamWriter streamWriter = new(SpeedrunnerUtils.SplitPath);
@@ -354,15 +460,22 @@ namespace SpeedrunningUtils
                 {
                     var split = splits[i];
                     Plugin.Log.LogInfo($"Loading split {(string)split["SplitName"]}");
+                    bool isFinalSplit = false;
+                    try
+                    {
+                        isFinalSplit = (string)split["isFinalSplit"] == "true";
+                    }
+                    catch { }
                     CustomSplit spl = new()
                     {
                         SplitName = (string)split["SplitName"],
                         condition = ParseCondition(split["condition"]),
-                        collider = ParseCollider(split["collider"]),
-                        shouldSplitHere = (string)split["shouldSplitHere"] == "true"
+                        bounds = ParseBounds(split["bounds"]),
+                        shouldSplitHere = (string)split["shouldSplitHere"] == "true",
+                        finalSplit = isFinalSplit
                     };
                     SpeedrunnerUtils.splits = [.. SpeedrunnerUtils.splits, spl];
-                    if (spl.shouldSplitHere)
+                    if (spl.shouldSplitHere && !isFinalSplit)
                     {
                         Livesplit.SendCommand($"setsplitname {actualSplitIndex} {spl.SplitName}\r\n");
                         actualSplitIndex++;
@@ -376,12 +489,12 @@ namespace SpeedrunningUtils
             }
         }
 
-        public static void SaveSplits()
+        internal static void SaveSplits()
         {
             string[] data = [];
             foreach (var split in SpeedrunnerUtils.splits)
             {
-                string parsed = $"{{\"SplitName\": \"${split.SplitName}\", \"condition\": {ParseConditionToJson(split.condition)}, \"collider\": {ParseColliderToJson(split.collider)}}}";
+                string parsed = $"{{\"SplitName\": \"${split.SplitName}\", \"condition\": {ParseConditionToJson(split.condition)}, \"bounds\": {ParseBoundsToJson(split.bounds.Value)}}}";
                 data = [.. data, parsed];
             }
             using StreamWriter streamWriter = new(SpeedrunnerUtils.SplitPath);
@@ -389,11 +502,12 @@ namespace SpeedrunningUtils
         }
     }
 
-    public class CustomSplit
+    internal class CustomSplit
     {
-        public BoxCollider? collider;
-        public Condition? condition;
-        public string SplitName;
-        public bool shouldSplitHere;
+        internal Bounds? bounds;
+        internal Condition? condition;
+        internal string SplitName;
+        internal bool shouldSplitHere;
+        internal bool finalSplit;
     }
 }

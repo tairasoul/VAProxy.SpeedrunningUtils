@@ -1,50 +1,49 @@
 ﻿
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace SpeedrunningUtils
+
 {
     internal class VisualiserComponent : MonoBehaviour
     {
-        Collider trigger;
-        private LineRenderer lineRenderer;
-        private Color color = Color.cyan;
-
-        internal void Start()
-        {
-            trigger = gameObject.GetComponent<Collider>();
-            if (!trigger)
-            {
-                trigger = gameObject.AddComponent<Collider>();
-            }
-        }
-
+        private List<Bounds> boundColliders = new List<Bounds>(); // List to store bounds
         private void Update()
         {
             if (Plugin.VisualisingHitboxes)
             {
-                DrawTrail();
+                foreach (Bounds bounds in boundColliders)
+                {
+                    VisualizeBound(bounds);
+                }
             }
             else
             {
-                Destroy(this);
+                Destroy(GetComponent<LineRenderer>());
             }
         }
 
-        private void DrawTrail()
+        internal void AddBounds(Bounds bounds)
         {
-            lineRenderer = gameObject.AddComponent<LineRenderer>();
-            lineRenderer.useWorldSpace = false; // Use local space
-            lineRenderer.loop = true; // Close the loop for trail
-            lineRenderer.material = new Material(Shader.Find("Sprites/Default")); // Change the material
-            lineRenderer.startWidth = 0.05f;
-            lineRenderer.endWidth = 0.05f;
-            lineRenderer.startColor = color;
-            lineRenderer.endColor = color;
+            boundColliders.Add(bounds);
+        }
 
-            BoxCollider collider = trigger as BoxCollider;
+        internal void RemoveBounds(Bounds bounds)
+        {
+            boundColliders.Remove(bounds);
+        }
 
-            Vector3 center = collider.center;
-            Vector3 size = collider.size;
+        private void VisualizeBound(Bounds bounds)
+        {
+            LineRenderer lineRenderer = gameObject.GetComponent<LineRenderer>();
+            if (!lineRenderer)
+            {
+                lineRenderer = gameObject.AddComponent<LineRenderer>();
+                // Set LineRenderer properties (same as in your code)
+            }
+
+            Vector3 center = bounds.center;
+            Vector3 size = bounds.size;
 
             Vector3[] corners =
             {
@@ -72,11 +71,6 @@ namespace SpeedrunningUtils
             {
                 lineRenderer.SetPosition(i, corners[indices[i]]);
             }
-        }
-
-        private void OnDestroy()
-        {
-            if (lineRenderer) Destroy(lineRenderer);
         }
     }
 }
