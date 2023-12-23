@@ -75,6 +75,10 @@ namespace SpeedrunningUtils
             {
                 Livesplit.SendCommand("reset\r\n");
             }
+            if (CurrentScene == "Menu")
+            {
+                SplitIndex = 0;
+            }
         }
 
         private void Update()
