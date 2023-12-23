@@ -9,7 +9,7 @@ using BepInEx.Configuration;
 
 namespace SpeedrunningUtils
 {
-    [BepInPlugin("tairasoul.vaproxy.speedrunning", "SpeedrunningUtils", "1.0.1")]
+    [BepInPlugin("tairasoul.vaproxy.speedrunning", "SpeedrunningUtils", "1.0.2")]
     public class Plugin : BaseUnityPlugin
     {
         public static ManualLogSource Log;
@@ -66,6 +66,7 @@ namespace SpeedrunningUtils
                             Toggle.GetComponent<Toggle>().onValueChanged.AddListener((bool enabled) =>
                             {
                                 VisualisingHitboxes = enabled;
+                                VisualizeHitboxesByDefault.Value = enabled;
                             });
                         }
                         catch (Exception ex)
