@@ -2,14 +2,8 @@
 
 Simple speedrunning utils for VA Proxy.
 
-The main features don't work yet, so I'll only end up publishing a release when the entire thing works.
+Needs [LiveSplit.Server.Modded](https://github.com/tairasoul/LiveSplit.Server.Modded) to create splits if they aren't there already.
 
 Functionality planned to be finished:
-
-Ability to create custom colliders for splits
-
-Ability to create condition-based splits
-
-Ability to combine both
 
 A quick-restart keybind that starts you back at the very beginning
