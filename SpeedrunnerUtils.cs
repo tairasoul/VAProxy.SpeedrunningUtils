@@ -197,7 +197,7 @@ namespace SpeedrunningUtils
                     object fieldValue = null;
                     try
                     {
-                        Type objType = obj.GetType();
+                        Type objType = component.GetType();
                         // Attempt to get the field
                         FieldInfo[] fields = objType.GetFields();
                         foreach (FieldInfo field in fields)
