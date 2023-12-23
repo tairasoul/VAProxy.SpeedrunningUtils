@@ -4,6 +4,8 @@ Simple speedrunning utils for VA Proxy.
 
 Needs [LiveSplit.Server.Modded](https://github.com/tairasoul/LiveSplit.Server.Modified) to create splits if they aren't there already.
 
+Also needs [SettingsAPI.VAProxy](https://github.com/tairasoul/SettingsAPI.VAProxy) to integrate into the actual game UI for settings.
+
 I'd recommend clearing all your splits when you load up a new config or modify existing config, as it renames splits based on the splits marked as shouldSplitHere in Splits.json
 
 Functionality planned to be finished:
