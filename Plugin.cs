@@ -9,7 +9,7 @@ using BepInEx.Configuration;
 
 namespace SpeedrunningUtils
 {
-    [BepInPlugin("tairasoul.vaproxy.speedrunning", "SpeedrunningUtils", "1.0.4")]
+    [BepInPlugin("tairasoul.vaproxy.speedrunning", "SpeedrunningUtils", "1.0.5")]
     public class Plugin : BaseUnityPlugin
     {
         public static ManualLogSource Log;
