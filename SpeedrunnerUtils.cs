@@ -469,12 +469,18 @@ namespace SpeedrunningUtils
                         isFinalSplit = (string)split["isFinalSplit"] == "true";
                     }
                     catch { }
+                    bool shouldSplitHere = false;
+                    try
+                    {
+                        shouldSplitHere = (string)split["shouldSplitHere"] == "true";
+                    }
+                    catch { }
                     CustomSplit spl = new()
                     {
                         SplitName = (string)split["SplitName"],
                         condition = ParseCondition(split["condition"]),
                         bounds = ParseBounds(split["bounds"]),
-                        shouldSplitHere = (string)split["shouldSplitHere"] == "true",
+                        shouldSplitHere = shouldSplitHere,
                         finalSplit = isFinalSplit
                     };
                     SpeedrunnerUtils.splits = [.. SpeedrunnerUtils.splits, spl];
