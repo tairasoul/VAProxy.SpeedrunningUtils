@@ -11,6 +11,20 @@ using System.Collections.Generic;
 
 namespace SpeedrunningUtils
 {
+    internal static class JExtensions
+    {
+        internal static bool HasValue(this JToken token, object value)
+        {
+            foreach (object val in token.Values())
+            {
+                if (val == value)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
     internal static class ObjectExtensions
     {
         internal static object GetFieldOrPropertyValue(this object obj, string fieldNameOrPropertyName)
@@ -464,17 +478,15 @@ namespace SpeedrunningUtils
                     var split = splits[i];
                     Plugin.Log.LogInfo($"Loading split {(string)split["SplitName"]}");
                     bool isFinalSplit = true;
-                    try
+                    if (split.HasValue("isFinalSplit"))
                     {
                         isFinalSplit = (string)split["isFinalSplit"] == "true";
                     }
-                    catch { }
                     bool shouldSplitHere = false;
-                    try
+                    if (split.HasValue("shouldSplitHere"))
                     {
                         shouldSplitHere = (string)split["shouldSplitHere"] == "true";
                     }
-                    catch { }
                     CustomSplit spl = new()
                     {
                         SplitName = (string)split["SplitName"],
