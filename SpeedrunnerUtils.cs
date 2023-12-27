@@ -55,7 +55,6 @@ namespace SpeedrunningUtils
     internal class SpeedrunnerUtils : MonoBehaviour
     {
         private string CurrentScene = "Intro";
-        private Vector3 ColliderStart;
         internal static CustomSplit[] splits = [];
         private int SplitIndex = 0;
         internal static Condition[] Conditions = [];
@@ -464,7 +463,7 @@ namespace SpeedrunningUtils
                 {
                     var split = splits[i];
                     Plugin.Log.LogInfo($"Loading split {(string)split["SplitName"]}");
-                    bool isFinalSplit = false;
+                    bool isFinalSplit = true;
                     try
                     {
                         isFinalSplit = (string)split["isFinalSplit"] == "true";
@@ -482,8 +481,9 @@ namespace SpeedrunningUtils
                     if (spl.shouldSplitHere && !isFinalSplit)
                     {
                         Livesplit.SendCommand($"setsplitname {actualSplitIndex} {spl.SplitName}\r\n");
-                        actualSplitIndex++;
                     }
+                    if (spl.shouldSplitHere || isFinalSplit)
+                        actualSplitIndex++;
                     Plugin.Log.LogInfo($"Loaded split {(string)split["SplitName"]}");
                 }
                 catch (Exception e)
