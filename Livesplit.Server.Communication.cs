@@ -39,7 +39,7 @@ namespace SpeedrunningUtils
                     return null;
                 }
 
-                byte[] data = Encoding.UTF8.GetBytes(command);
+                byte[] data = Encoding.UTF8.GetBytes(command + "\r\n");
                 _client.GetStream().Write(data, 0, data.Length);
 
                 Plugin.Log.LogInfo($"Sending command {command}.");

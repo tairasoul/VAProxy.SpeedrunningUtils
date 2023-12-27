@@ -7,17 +7,17 @@ using System.Collections;
 using BepInEx;
 using System.Reflection;
 using SettingsAPI;
-using System.Collections.Generic;
 
 namespace SpeedrunningUtils
 {
     internal static class JExtensions
     {
-        internal static bool HasValue(this JToken token, object value)
+        internal static bool HasKey(this JToken token, string key)
         {
-            foreach (object val in token.Values())
+            if (token.Type == JTokenType.Object)
             {
-                if (val == value)
+                JObject obj = (JObject)token;
+                if (obj.TryGetValue(key, StringComparison.OrdinalIgnoreCase, out JToken propValue))
                 {
                     return true;
                 }
@@ -86,7 +86,7 @@ namespace SpeedrunningUtils
             CurrentScene = newS.name;
             if (CurrentScene != "Menu" && CurrentScene != "Intro")
             {
-                Livesplit.SendCommand("reset\r\n");
+                Livesplit.SendCommand("reset");
             }
             if (CurrentScene == "Menu")
             {
@@ -108,7 +108,7 @@ namespace SpeedrunningUtils
                             if (split.shouldSplitHere || split.finalSplit)
                             {
                                 Plugin.Log.LogInfo("Splitting at split " + split.SplitName);
-                                Livesplit.SendCommand("startorsplit\r\n");
+                                Livesplit.SendCommand("startorsplit");
                             }
                             SplitIndex++;
                         }
@@ -120,7 +120,7 @@ namespace SpeedrunningUtils
                             if (split.shouldSplitHere || split.finalSplit)
                             {
                                 Plugin.Log.LogInfo("Splitting at split " + split.SplitName);
-                                Livesplit.SendCommand("startorsplit\r\n");
+                                Livesplit.SendCommand("startorsplit");
                             }
                             SplitIndex++;
                         }
@@ -133,7 +133,7 @@ namespace SpeedrunningUtils
                         if (split.shouldSplitHere || split.finalSplit)
                         {
                             Plugin.Log.LogInfo("Splitting at split " + split.SplitName);
-                            Livesplit.SendCommand("startorsplit\r\n");
+                            Livesplit.SendCommand("startorsplit");
                         }
                         SplitIndex++;
                     }
@@ -478,12 +478,12 @@ namespace SpeedrunningUtils
                     var split = splits[i];
                     Plugin.Log.LogInfo($"Loading split {(string)split["SplitName"]}");
                     bool isFinalSplit = true;
-                    if (split.HasValue("isFinalSplit"))
+                    if (split.HasKey("isFinalSplit"))
                     {
                         isFinalSplit = (string)split["isFinalSplit"] == "true";
                     }
                     bool shouldSplitHere = false;
-                    if (split.HasValue("shouldSplitHere"))
+                    if (split.HasKey("shouldSplitHere"))
                     {
                         shouldSplitHere = (string)split["shouldSplitHere"] == "true";
                     }
@@ -498,7 +498,7 @@ namespace SpeedrunningUtils
                     SpeedrunnerUtils.splits = [.. SpeedrunnerUtils.splits, spl];
                     if (spl.shouldSplitHere && !isFinalSplit)
                     {
-                        Livesplit.SendCommand($"setsplitname {actualSplitIndex} {spl.SplitName}\r\n");
+                        Livesplit.SendCommand($"setsplitname {actualSplitIndex} {spl.SplitName}");
                     }
                     if (spl.shouldSplitHere || isFinalSplit)
                         actualSplitIndex++;
