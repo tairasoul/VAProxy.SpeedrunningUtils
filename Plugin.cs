@@ -6,10 +6,12 @@ using SettingsAPI;
 using UnityEngine.UI;
 using System;
 using BepInEx.Configuration;
+using System.IO;
+using Devdog.General.UI;
 
 namespace SpeedrunningUtils
 {
-    [BepInPlugin("tairasoul.vaproxy.speedrunning", "SpeedrunningUtils", "1.0.5")]
+    [BepInPlugin("tairasoul.vaproxy.speedrunning", "SpeedrunningUtils", "1.1.0")]
     public class Plugin : BaseUnityPlugin
     {
         public static ManualLogSource Log;
@@ -17,11 +19,17 @@ namespace SpeedrunningUtils
         internal static bool VisualisingHitboxes = false;
         internal static VisualiserComponent Visualiser;
         internal static ConfigEntry<bool> VisualizeHitboxesByDefault;
+        internal static ConfigEntry<bool> SetLayout;
+        internal static ConfigEntry<string> LastLoadedConfig;
+        internal static ConfigFile cfg;
         private bool init = false;
 
         private void Awake()
         {
-            VisualizeHitboxesByDefault = Config.Bind("Speedrunning", "Visualise split bounds by default", true, "Should a split's bounds be visualised by default?");
+            cfg = Config;
+            VisualizeHitboxesByDefault = cfg.Bind("Speedrunning", "Visualise split bounds by default", true, "Should a split's bounds be visualised by default?");
+            LastLoadedConfig = cfg.Bind("Speedrunning", "Last loaded config", "", "The config last loaded by SpeedrunningUtils.");
+            SetLayout = cfg.Bind("Speedrunning", "Set Layout", false, "Should SpeedrunningUtils forcibly set the layout?");
             VisualisingHitboxes = VisualizeHitboxesByDefault.Value;
             Log = Logger;
             Log.LogInfo("SpeedrunningUtils awake.");
@@ -48,8 +56,7 @@ namespace SpeedrunningUtils
                 Visualiser = ColliderStorage.AddComponent<VisualiserComponent>();
                 DontDestroyOnLoad(ColliderStorage);
                 DontDestroyOnLoad(Utils);
-                Utils.AddComponent<SpeedrunnerUtils>();
-                Log.LogInfo("SpeedrunningUtils initialized. Good luck speedrunning!");
+                SpeedrunnerUtils utils = Utils.AddComponent<SpeedrunnerUtils>();
                 Option[] options = [];
                 Option VisualizeOption = new()
                 {
@@ -77,6 +84,90 @@ namespace SpeedrunningUtils
                 };
                 options = options.Append(VisualizeOption);
                 Settings.API.RegisterMod("tairasoul.speedrunning.utils", "SpeedrunningUtils", options);
+                Option[] SplitOptions = [];
+                string dir = $"{Paths.PluginPath}/SpeedrunningUtils.Splits";
+                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                foreach (string file in Directory.EnumerateFiles(dir))
+                {
+                    Log.LogInfo($"Creating option for {Path.GetFileName(file)}.");
+                    Option opt = new()
+                    {
+                        Create = (GameObject page) =>
+                        {
+                            GameObject button = ComponentUtils.CreateButton(Path.GetFileName(file), $"split.file.{Path.GetFileName(file)}");
+                            Button b = button.GetComponent<Button>();
+                            b.onClick.AddListener(() =>
+                            {
+                                LastLoadedConfig.Value = Path.GetFileName(file);
+                                utils.Clear();
+                                SplitLoader.LoadSplits(file);
+                                Livesplit.SendCommand("reset");
+                            });
+                            Text text = button.Find("ItemName").GetComponent<Text>();
+                            text.resizeTextForBestFit = true;
+                            text.verticalOverflow = VerticalWrapMode.Overflow;
+                            text.horizontalOverflow = HorizontalWrapMode.Overflow;
+                            button.Find("ItemName").GetComponent<RectTransform>().anchoredPosition = new Vector2(-89.3072f, 0);
+                            LayoutElement elem = button.AddComponent<LayoutElement>();
+                            elem.minWidth = 50f;
+                            elem.minHeight = 50f;
+                            button.SetParent(page.Find("Viewport/Content"), false);
+                        }
+                    };
+                    SplitOptions = [.. SplitOptions, opt];
+                }
+                static void CreationCallback(GameObject page)
+                {
+                    GameObject ScrollbarVertical = GameObject.Find("MAINMENU/Canvas/Pages/Inventory/Content/__INVENTORY_CONTAINER/Container/InventorySlots/Scrollbar Vertical");
+                    GameObject ScrollVertical = ScrollbarVertical.Instantiate();
+                    ScrollVertical.name = "Scrollbar Vertical";
+                    ScrollVertical.SetParent(page, false);
+                    ScrollVertical.GetComponent<RectTransform>().anchoredPosition = new Vector2(483.2355f, -113.0717f);
+                    Scrollbar bar = ScrollVertical.GetComponent<Scrollbar>();
+                    bar.direction = Scrollbar.Direction.TopToBottom;
+                    bar.interactable = true;
+                    bar.navigation = Navigation.defaultNavigation;
+                    bar.useGUILayout = true;
+                    ScrollVertical.GetComponent<RectTransform>().localScale = new Vector3(1, 5, 1);
+                    GameObject Viewport = new GameObject("Viewport");
+                    RectTransform ViewportRect = Viewport.AddComponent<RectTransform>();
+                    Viewport.AddComponent<CanvasRenderer>();
+                    Viewport.AddComponent<Animator>();
+                    CanvasGroup canvas = Viewport.AddComponent<CanvasGroup>();
+                    canvas.blocksRaycasts = true;
+                    canvas.interactable = true;
+                    Viewport.AddComponent<Mask>();
+                    Viewport.AddComponent<AnimatorHelper>();
+                    Viewport.SetParent(page, false);
+                    ViewportRect.anchoredPosition = new Vector2(73.3544f, -190.1612f);
+                    ViewportRect.sizeDelta = new Vector2(1000, 700);
+                    ScrollRect scroll = page.AddComponent<ScrollRect>();
+                    scroll.inertia = true;
+                    scroll.horizontal = false;
+                    scroll.decelerationRate = 0.135f;
+                    scroll.elasticity = 0.1f;
+                    scroll.movementType = ScrollRect.MovementType.Elastic;
+                    scroll.scrollSensitivity = 25;
+                    scroll.vertical = true;
+                    scroll.verticalScrollbar = bar;
+                    scroll.viewport = ViewportRect;
+                    scroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
+                    GameObject Content = Viewport.AddObject("Content");
+                    RectTransform contentTransform = Content.AddComponent<RectTransform>();
+                    contentTransform.anchoredPosition = new Vector2(-11.8327f, 0.0009f);
+                    contentTransform.sizeDelta = new Vector2(900, 600);
+                    scroll.content = contentTransform;
+                    GridLayoutGroup group = Content.AddComponent<GridLayoutGroup>();
+                    group.childAlignment = TextAnchor.UpperLeft;
+                    group.spacing = new Vector2(80, 20);
+                    group.cellSize = new Vector2(350, 50);
+                    group.startCorner = GridLayoutGroup.Corner.UpperLeft;
+                    group.startAxis = GridLayoutGroup.Axis.Horizontal;
+                    group.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+                    group.constraintCount = 2;
+                }
+                Settings.API.RegisterMod("tairasoul.speedrunning.splits", "SpeedrunningSplits", SplitOptions, CreationCallback);
+                Log.LogInfo("SpeedrunningUtils initialized. Good luck speedrunning!");
             }
         }
     }

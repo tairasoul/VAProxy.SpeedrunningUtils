@@ -71,14 +71,33 @@ namespace SpeedrunningUtils
         private string CurrentScene = "Intro";
         internal static CustomSplit[] splits = [];
         private int SplitIndex = 0;
-        internal static Condition[] Conditions = [];
-        internal static string SplitPath = Path.Combine(Paths.ConfigPath, "Splits.json");
+        internal static string SplitPath = Path.Combine(Paths.PluginPath, "SpeedrunningUtils.Splits", "DefaultSplits.json");
+
+        internal string ParseSplitsToJson()
+        {
+            string splits = @"[";
+            foreach (CustomSplit split in SpeedrunnerUtils.splits)
+            {
+                splits += SplitLoader.ParseSplit(split);
+            }
+            splits += "]";
+            return splits;
+        }
+
+        internal void Clear()
+        {
+            //Livesplit.SendCommand("clearsplits");
+            splits = [];
+        }
 
         private void Awake()
         {
             SceneManager.activeSceneChanged += OnSceneChanged;
             Livesplit.StartSocket();
-            SplitLoader.LoadSplits();
+            if (Plugin.LastLoadedConfig.Value != "")
+            {
+                SplitLoader.LoadSplits($"{Paths.PluginPath}/SpeedrunningUtils.Splits/{Plugin.LastLoadedConfig.Value}");
+            }
         }
 
         private void OnSceneChanged(Scene old, Scene newS)
@@ -105,7 +124,7 @@ namespace SpeedrunningUtils
                     if (split.bounds != null)
                     {
                         if (fulfilled && split.bounds.Value.Contains(GameObject.Find("S-105").transform.position)) {
-                            if (split.shouldSplitHere || split.finalSplit)
+                            if (split.shouldSplitHere)
                             {
                                 Plugin.Log.LogInfo("Splitting at split " + split.SplitName);
                                 Livesplit.SendCommand("startorsplit");
@@ -117,7 +136,7 @@ namespace SpeedrunningUtils
                     {
                         if (fulfilled)
                         {
-                            if (split.shouldSplitHere || split.finalSplit)
+                            if (split.shouldSplitHere)
                             {
                                 Plugin.Log.LogInfo("Splitting at split " + split.SplitName);
                                 Livesplit.SendCommand("startorsplit");
@@ -130,7 +149,7 @@ namespace SpeedrunningUtils
                 {
                     if (split.bounds.Value.Contains(GameObject.Find("S-105").transform.position))
                     {
-                        if (split.shouldSplitHere || split.finalSplit)
+                        if (split.shouldSplitHere)
                         {
                             Plugin.Log.LogInfo("Splitting at split " + split.SplitName);
                             Livesplit.SendCommand("startorsplit");
@@ -399,7 +418,7 @@ namespace SpeedrunningUtils
         {
             return $"{{ \"Name\": \"{condition.Name}\", \"Path\": \"{condition.Path}\", \"Property\": \"{condition.Property}\", \"Value\": \"{condition.Value}\", \"ValueType\": \"{condition.ValueType}\", \"Comparison\": \"{condition.Comparison}\"";
         }
-        internal static void LoadSplits()
+        internal static void LoadSplits(string path)
         {
             if (!File.Exists(SpeedrunnerUtils.SplitPath))
             {
@@ -467,7 +486,7 @@ namespace SpeedrunningUtils
                 streamWriter.Write(baseData);
             }
 
-            string json = File.ReadAllText(SpeedrunnerUtils.SplitPath);
+            string json = File.ReadAllText(path);
 
             JArray splits = JArray.Parse(json);
             int actualSplitIndex = 0;
@@ -496,7 +515,7 @@ namespace SpeedrunningUtils
                         finalSplit = isFinalSplit
                     };
                     SpeedrunnerUtils.splits = [.. SpeedrunnerUtils.splits, spl];
-                    if (spl.shouldSplitHere && !isFinalSplit)
+                    if (spl.shouldSplitHere && !isFinalSplit && Plugin.SetLayout.Value)
                     {
                         Livesplit.SendCommand($"setsplitname {actualSplitIndex} {spl.SplitName}");
                     }
@@ -521,6 +540,11 @@ namespace SpeedrunningUtils
             }
             using StreamWriter streamWriter = new(SpeedrunnerUtils.SplitPath);
             streamWriter.Write(data);
+        }
+
+        internal static string ParseSplit(CustomSplit split)
+        {
+            return $"{{\"SplitName\": \"${split.SplitName}\", \"condition\": {ParseConditionToJson(split.condition)}, \"bounds\": {ParseBoundsToJson(split.bounds.Value)}}}";
         }
     }
 
