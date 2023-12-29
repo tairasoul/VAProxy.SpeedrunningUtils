@@ -111,7 +111,7 @@ namespace SpeedrunningUtils
                 {
                     RestartKeyDown = true;
                     PlayerPrefs.DeleteAll();
-                    SceneManager.LoadScene(2, LoadSceneMode.Single);
+                    SceneManager.LoadScene(1, LoadSceneMode.Single);
                     Livesplit.SendCommand("reset");
                     SplitIndex = 0;
                 }
