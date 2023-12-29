@@ -6,8 +6,6 @@ Needs [LiveSplit.Server.Modded](https://github.com/tairasoul/LiveSplit.Server.Mo
 
 Also needs [SettingsAPI.VAProxy](https://github.com/tairasoul/SettingsAPI.VAProxy) to integrate into the actual game UI for settings. It is included by default though.
 
-I'd recommend clearing all your splits when you load up a new config or modify existing config, as it renames splits based on the splits marked as shouldSplitHere in Splits.json
-
 If you want some pre-made configs, go to [SpeedrunConfigs repo](https://github.com/tairasoul/VAProxy.SpeedrunConfigs)
 
 ## Changelog
