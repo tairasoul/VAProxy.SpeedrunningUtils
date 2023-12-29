@@ -15,8 +15,9 @@ namespace SpeedrunningUtils
     {
         internal const string GUID = "tairasoul.vaproxy.speedrunning";
         internal const string Name = "SpeedrunningUtils";
-        internal const string Version = "3.0.0";
+        internal const string Version = "3.0.1";
     }
+
     [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
     public class Plugin : BaseUnityPlugin
     {
@@ -27,6 +28,7 @@ namespace SpeedrunningUtils
         internal static ConfigEntry<bool> VisualizeHitboxesByDefault;
         internal static ConfigEntry<bool> SetLayout;
         internal static ConfigEntry<string> LastLoadedConfig;
+        internal static ConfigEntry<KeyboardShortcut> RestartKey;
         internal static ConfigFile cfg;
         private bool init = false;
 
@@ -36,6 +38,7 @@ namespace SpeedrunningUtils
             VisualizeHitboxesByDefault = cfg.Bind("Speedrunning", "Visualise split bounds by default", true, "Should a split's bounds be visualised by default?");
             LastLoadedConfig = cfg.Bind("Speedrunning", "Last loaded config", "", "The config last loaded by SpeedrunningUtils.");
             SetLayout = cfg.Bind("Speedrunning", "Set Layout", false, "Should SpeedrunningUtils forcibly set the layout where specified?");
+            RestartKey = cfg.Bind("Keybinds", "Restart keybind", new KeyboardShortcut(KeyCode.P), "Keybind to restart from the beginning of the game.");
             VisualisingHitboxes = VisualizeHitboxesByDefault.Value;
             Log = Logger;
             Log.LogInfo("SpeedrunningUtils awake.");
@@ -63,6 +66,7 @@ namespace SpeedrunningUtils
                 DontDestroyOnLoad(ColliderStorage);
                 DontDestroyOnLoad(Utils);
                 SpeedrunnerUtils utils = Utils.AddComponent<SpeedrunnerUtils>();
+                utils.enabled = true;
                 Option[] options = [];
                 Option VisualizeOption = new()
                 {

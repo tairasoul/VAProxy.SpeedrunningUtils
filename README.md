@@ -10,10 +10,6 @@ I'd recommend clearing all your splits when you load up a new config or modify e
 
 If you want some pre-made configs, go to [SpeedrunConfigs repo](https://github.com/tairasoul/VAProxy.SpeedrunConfigs)
 
-Functionality planned to be finished:
-
-A quick-restart keybind that starts you back at the very beginning
-
 ## Changelog
 
 Changelog is at [SpeedrunningUtils/changelog.md](https://github.com/tairasoul/VAProxy.SpeedrunningUtils/blob/master/changelog.md)

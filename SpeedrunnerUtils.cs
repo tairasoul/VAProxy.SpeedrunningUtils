@@ -71,6 +71,7 @@ namespace SpeedrunningUtils
         private string CurrentScene = "Intro";
         internal static CustomSplit[] splits = [];
         private int SplitIndex = 0;
+        private bool RestartKeyDown = false;
 
         internal void Clear()
         {
@@ -80,6 +81,7 @@ namespace SpeedrunningUtils
 
         private void Awake()
         {
+            Plugin.Log.LogInfo("SpeedrunnerUtils component awake.");
             SceneManager.activeSceneChanged += OnSceneChanged;
             Livesplit.StartSocket();
             if (Plugin.LastLoadedConfig.Value != "")
@@ -103,6 +105,21 @@ namespace SpeedrunningUtils
 
         private void Update()
         {
+            if (Plugin.RestartKey.Value.IsDown())
+            {
+                if (!RestartKeyDown)
+                {
+                    RestartKeyDown = true;
+                    PlayerPrefs.DeleteAll();
+                    SceneManager.LoadScene(2, LoadSceneMode.Single);
+                    Livesplit.SendCommand("reset");
+                    SplitIndex = 0;
+                }
+            }
+            else
+            {
+                RestartKeyDown = false;
+            }
             if (CurrentScene != "Intro" && CurrentScene != "Menu")
             {
                 CustomSplit split = splits[SplitIndex];
