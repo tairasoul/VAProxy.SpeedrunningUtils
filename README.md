@@ -14,6 +14,10 @@ Functionality planned to be finished:
 
 A quick-restart keybind that starts you back at the very beginning
 
+## Changelog
+
+Changelog is at [SpeedrunningUtils/changelog.md](https://github.com/tairasoul/VAProxy.SpeedrunningUtils/blob/master/changelog.md)
+
 ## Setup for splits
 
 Splits are located at BepInEx/config/Splits.json
@@ -25,16 +29,16 @@ Each split is formatted like this:
   "SplitName": "name of split",
   "condition": condition,
   "bounds": bounds,
-  "shouldSplitHere": "true", // or "false"
-  "isFinalSplit": "true", // or "false"
+  "splitHere": "true", // or "false"
+  "addToLayout": "true", // or "false"
 }
 ```
 
 Condition and bounds is optional, but atleast one of them is required.
 
-shouldSplitHere adds it to the splits you have, and will split once the conditions are met or the player is in the bounds.
+splitHere means this split will end up sending startorsplit once requirements are met..
 
-isFinalSplit means it won't be added but will split once conditions are met or player is in bounds. This is intended to be used for your last split.
+addToLayout means it will be added to your LiveSplit layout. This will replace whatever you have at that index with this split name.
 
 ### Condition formatting
 
@@ -61,68 +65,4 @@ Bounds are formatted like this:
   "center": "x y z", // Something like "4049.9 10501.425 374.2478", the center of the bounds.
   "size": "x y z" // Something like "25.748 4 21.6042", the size of the bounds.
 }
-```
-
-### Default splits.json
-
-The default splits.json is
-```json5
-[
-    {
-        "SplitName": "PreStart Split",
-        "condition": {
-            "Name": "WasCutsceneActive",
-            "Path": "Director/Cutscene4",
-            "Property": "activeSelf",
-            "Value": "true",
-            "ValueType": "bool",
-            "Comparison": "=="
-        },
-        "shouldSplitHere": "false"
-    },
-    {
-        "SplitName": "Spawn",
-        "condition": {
-            "Name": "CutsceneNotActive",
-            "Path": "Director/Cutscene4",
-            "Property": "activeSelf",
-            "Value": "false",
-            "ValueType": "bool",
-            "Comparison": "=="
-        },
-        "shouldSplitHere": "true"
-    },
-    {
-        "SplitName": "DropCutscene-Pre",
-        "condition": {
-            "Name": "WasCutsceneActive",
-            "Path": "Director/Cutscene6",
-            "Property": "activeSelf",
-            "Value": "true",
-            "ValueType": "bool",
-            "Comparison": "=="
-        },
-        "shouldSplitHere": "false"
-    },
-    {
-        "SplitName": "Drop",
-        "condition": {
-            "Name": "CutsceneNotActive",
-            "Path": "Director/Cutscene6",
-            "Property": "activeSelf",
-            "Value": "false",
-            "ValueType": "bool",
-            "Comparison": "=="
-        },
-        "shouldSplitHere": "true"
-    },
-    {
-        "SplitName": "Scrap Pits",
-        "bounds": {
-            "center": "4049.9 10501.425 374.2478",
-            "size": "25.748 4 21.6042"
-        },
-        "shouldSplitHere": "true"
-    }
-]
 ```

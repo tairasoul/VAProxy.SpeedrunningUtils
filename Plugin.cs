@@ -11,7 +11,7 @@ using Devdog.General.UI;
 
 namespace SpeedrunningUtils
 {
-    [BepInPlugin("tairasoul.vaproxy.speedrunning", "SpeedrunningUtils", "1.1.0")]
+    [BepInPlugin("tairasoul.vaproxy.speedrunning", "SpeedrunningUtils", "2.0.0")]
     public class Plugin : BaseUnityPlugin
     {
         public static ManualLogSource Log;
@@ -29,7 +29,7 @@ namespace SpeedrunningUtils
             cfg = Config;
             VisualizeHitboxesByDefault = cfg.Bind("Speedrunning", "Visualise split bounds by default", true, "Should a split's bounds be visualised by default?");
             LastLoadedConfig = cfg.Bind("Speedrunning", "Last loaded config", "", "The config last loaded by SpeedrunningUtils.");
-            SetLayout = cfg.Bind("Speedrunning", "Set Layout", false, "Should SpeedrunningUtils forcibly set the layout?");
+            SetLayout = cfg.Bind("Speedrunning", "Set Layout", false, "Should SpeedrunningUtils forcibly set the layout where specified?");
             VisualisingHitboxes = VisualizeHitboxesByDefault.Value;
             Log = Logger;
             Log.LogInfo("SpeedrunningUtils awake.");

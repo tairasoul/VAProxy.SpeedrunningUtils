@@ -71,7 +71,6 @@ namespace SpeedrunningUtils
         private string CurrentScene = "Intro";
         internal static CustomSplit[] splits = [];
         private int SplitIndex = 0;
-        internal static string SplitPath = Path.Combine(Paths.PluginPath, "SpeedrunningUtils.Splits", "DefaultSplits.json");
 
         internal string ParseSplitsToJson()
         {
@@ -124,7 +123,7 @@ namespace SpeedrunningUtils
                     if (split.bounds != null)
                     {
                         if (fulfilled && split.bounds.Value.Contains(GameObject.Find("S-105").transform.position)) {
-                            if (split.shouldSplitHere)
+                            if (split.splitHere)
                             {
                                 Plugin.Log.LogInfo("Splitting at split " + split.SplitName);
                                 Livesplit.SendCommand("startorsplit");
@@ -136,7 +135,7 @@ namespace SpeedrunningUtils
                     {
                         if (fulfilled)
                         {
-                            if (split.shouldSplitHere)
+                            if (split.splitHere)
                             {
                                 Plugin.Log.LogInfo("Splitting at split " + split.SplitName);
                                 Livesplit.SendCommand("startorsplit");
@@ -149,7 +148,7 @@ namespace SpeedrunningUtils
                 {
                     if (split.bounds.Value.Contains(GameObject.Find("S-105").transform.position))
                     {
-                        if (split.shouldSplitHere)
+                        if (split.splitHere)
                         {
                             Plugin.Log.LogInfo("Splitting at split " + split.SplitName);
                             Livesplit.SendCommand("startorsplit");
@@ -420,71 +419,6 @@ namespace SpeedrunningUtils
         }
         internal static void LoadSplits(string path)
         {
-            if (!File.Exists(SpeedrunnerUtils.SplitPath))
-            {
-                string baseData = @"[
-                {
-                    ""SplitName"": ""PreStart Split"",
-                    ""condition"": {
-                        ""Name"": ""WasCutsceneActive"",
-                        ""Path"": ""Director/Cutscene4"",
-                        ""Property"": ""activeSelf"",
-                        ""Value"": ""true"",
-                        ""ValueType"": ""bool"",
-                        ""Comparison"": ""==""
-                    },
-                    ""shouldSplitHere"": ""false""
-                },
-                {
-                    ""SplitName"": ""Spawn"",
-                    ""condition"": {
-                        ""Name"": ""CutsceneNotActive"",
-                        ""Path"": ""Director/Cutscene4"",
-                        ""Property"": ""activeSelf"",
-                        ""Value"": ""false"",
-                        ""ValueType"": ""bool"",
-                        ""Comparison"": ""==""
-                    },
-                    ""shouldSplitHere"": ""true""
-                },
-                {
-                    ""SplitName"": ""DropCutscene-Pre"",
-                    ""condition"": {
-                        ""Name"": ""WasCutsceneActive"",
-                        ""Path"": ""Director/Cutscene6"",
-                        ""Property"": ""activeSelf"",
-                        ""Value"": ""true"",
-                        ""ValueType"": ""bool"",
-                        ""Comparison"": ""==""
-                    },
-                    ""shouldSplitHere"": ""false""
-                },
-                {
-                    ""SplitName"": ""Drop"",
-                    ""condition"": {
-                        ""Name"": ""CutsceneNotActive"",
-                        ""Path"": ""Director/Cutscene6"",
-                        ""Property"": ""activeSelf"",
-                        ""Value"": ""false"",
-                        ""ValueType"": ""bool"",
-                        ""Comparison"": ""==""
-                    },
-                    ""shouldSplitHere"": ""true""
-                },
-                {
-                    ""SplitName"": ""Scrap Pits"",
-                    ""bounds"": {
-                        ""center"": ""4049.9 10501.425 374.2478"",
-                        ""size"": ""25.748 2 21.6042""
-                    },
-                    ""shouldSplitHere"": ""true""
-                }
-            ]";
-
-                // Create or overwrite the file with the base data
-                using StreamWriter streamWriter = new(SpeedrunnerUtils.SplitPath);
-                streamWriter.Write(baseData);
-            }
 
             string json = File.ReadAllText(path);
 
@@ -497,29 +431,29 @@ namespace SpeedrunningUtils
                     var split = splits[i];
                     Plugin.Log.LogInfo($"Loading split {(string)split["SplitName"]}");
                     bool isFinalSplit = true;
-                    if (split.HasKey("isFinalSplit"))
+                    if (split.HasKey("addToLayout"))
                     {
-                        isFinalSplit = (string)split["isFinalSplit"] == "true";
+                        isFinalSplit = (string)split["addToLayout"] == "true";
                     }
                     bool shouldSplitHere = false;
-                    if (split.HasKey("shouldSplitHere"))
+                    if (split.HasKey("splitHere"))
                     {
-                        shouldSplitHere = (string)split["shouldSplitHere"] == "true";
+                        shouldSplitHere = (string)split["splitHere"] == "true";
                     }
                     CustomSplit spl = new()
                     {
                         SplitName = (string)split["SplitName"],
                         condition = ParseCondition(split["condition"]),
                         bounds = ParseBounds(split["bounds"]),
-                        shouldSplitHere = shouldSplitHere,
-                        finalSplit = isFinalSplit
+                        splitHere = shouldSplitHere,
+                        addToLayout = isFinalSplit
                     };
                     SpeedrunnerUtils.splits = [.. SpeedrunnerUtils.splits, spl];
-                    if (spl.shouldSplitHere && !isFinalSplit && Plugin.SetLayout.Value)
+                    if (spl.addToLayout && Plugin.SetLayout.Value)
                     {
                         Livesplit.SendCommand($"setsplitname {actualSplitIndex} {spl.SplitName}");
                     }
-                    if (spl.shouldSplitHere || isFinalSplit)
+                    if (spl.addToLayout || isFinalSplit)
                         actualSplitIndex++;
                     Plugin.Log.LogInfo($"Loaded split {(string)split["SplitName"]}");
                 }
@@ -528,18 +462,6 @@ namespace SpeedrunningUtils
                     Plugin.Log.LogError(e);
                 }
             }
-        }
-
-        internal static void SaveSplits()
-        {
-            string[] data = [];
-            foreach (var split in SpeedrunnerUtils.splits)
-            {
-                string parsed = $"{{\"SplitName\": \"${split.SplitName}\", \"condition\": {ParseConditionToJson(split.condition)}, \"bounds\": {ParseBoundsToJson(split.bounds.Value)}}}";
-                data = [.. data, parsed];
-            }
-            using StreamWriter streamWriter = new(SpeedrunnerUtils.SplitPath);
-            streamWriter.Write(data);
         }
 
         internal static string ParseSplit(CustomSplit split)
@@ -553,7 +475,7 @@ namespace SpeedrunningUtils
         internal Bounds? bounds;
         internal Condition? condition;
         internal string SplitName;
-        internal bool shouldSplitHere;
-        internal bool finalSplit;
+        internal bool splitHere;
+        internal bool addToLayout;
     }
 }
