@@ -36,9 +36,11 @@ Each split is formatted like this:
 
 Condition and bounds is optional, but atleast one of them is required.
 
-splitHere means this split will end up sending startorsplit once requirements are met..
+splitHere means this split will end up sending startorsplit once requirements are met.
 
 addToLayout means it will be added to your LiveSplit layout. This will replace whatever you have at that index with this split name.
+
+addToLayout defaults to false, and splitHere defaults to true if you omit them.
 
 ### Condition formatting
 
