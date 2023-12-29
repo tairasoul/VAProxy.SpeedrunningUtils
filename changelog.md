@@ -1,3 +1,3 @@
 # Changelog
 
-Add restart keybind
+Restart keybind now loads main menu.
