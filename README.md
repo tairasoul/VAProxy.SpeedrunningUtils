@@ -27,14 +27,20 @@ Each split is formatted like this:
 ```json5
 {
   "SplitName": "name of split",
-  "condition": condition,
-  "bounds": bounds,
+  "splitCondition": condition,
+  "skipCondition": condition,
+  "splitBounds": bounds,
+  "skipBounds": bounds,
   "splitHere": "true", // or "false"
   "addToLayout": "true", // or "false"
 }
 ```
 
-Condition and bounds is optional, but atleast one of them is required.
+skipBounds and skipCondition are optional, however you need either splitCondition or splitBounds.
+
+skipBounds and skipCondition, once fulfilled, will skip that split if splitHere is true.
+
+splitBounds and splitCondition, once fulfilled, will split.
 
 splitHere means this split will end up sending startorsplit once requirements are met.
 
