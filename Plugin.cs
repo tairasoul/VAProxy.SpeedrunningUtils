@@ -11,7 +11,13 @@ using Devdog.General.UI;
 
 namespace SpeedrunningUtils
 {
-    [BepInPlugin("tairasoul.vaproxy.speedrunning", "SpeedrunningUtils", "2.0.0")]
+    internal class PluginInfo
+    {
+        internal const string GUID = "tairasoul.vaproxy.speedrunning";
+        internal const string Name = "SpeedrunningUtils";
+        internal const string Version = "3.0.0";
+    }
+    [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
     public class Plugin : BaseUnityPlugin
     {
         public static ManualLogSource Log;

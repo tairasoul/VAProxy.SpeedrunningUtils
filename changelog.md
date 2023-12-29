@@ -1,9 +1,9 @@
 # Changelog
 
-Make a few changes to splits
+More changes to splits
 
-Splits now contain splitHere and addToLayout instead of shouldSplitHere and isFinalSplit
+Rename condition to splitCondition, bounds to splitBounds
 
-The latter two were not exactly straight forward, while the new ones are.
+Add skipCondition and skipBounds
 
-Please revise any configs you have and update them to work with this version if you're planning to move to 2.0.0
+skipCondition and skipBounds are the same as the original condition and bounds, except they skip the split instead of splitting.
