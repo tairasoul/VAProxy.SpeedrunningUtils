@@ -15,7 +15,7 @@ Changelog is at [SpeedrunningUtils/changelog.md](https://github.com/tairasoul/VA
 
 ## Setup for splits
 
-Splits are located at BepInEx/config/Splits.json
+Split files are located at BepInEx/plugins/SpeedrunningUtils.Splits
 
 Each split is formatted like this:
 
