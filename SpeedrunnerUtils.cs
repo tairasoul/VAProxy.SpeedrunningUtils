@@ -112,8 +112,9 @@ namespace SpeedrunningUtils
                 if (!RestartKeyDown)
                 {
                     RestartKeyDown = true;
-                    PlayerPrefs.DeleteAll();
                     SceneManager.LoadScene(1, LoadSceneMode.Single);
+                    SaveSlotSelect select = GameObject.FindObjectOfType<SaveSlotSelect>();
+                    select.ClearSlotData(Plugin.CurrentSaveSlot);
                     Livesplit.SendCommand("reset");
                     SplitIndex = 0;
                 }
