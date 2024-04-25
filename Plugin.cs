@@ -11,6 +11,7 @@ using Devdog.General.UI;
 using UnityEngine.SceneManagement;
 using System.Linq;
 using System.Collections.Generic;
+using HarmonyLib;
 
 namespace SpeedrunningUtils
 {
@@ -27,12 +28,16 @@ namespace SpeedrunningUtils
         public static ManualLogSource Log;
         internal static GameObject ColliderStorage;
         internal static bool VisualisingHitboxes = false;
+
+        internal static int CurrentSaveSlot = 0;
         internal static VisualiserComponent Visualiser;
         internal static ConfigEntry<bool> VisualizeHitboxesByDefault;
         internal static ConfigEntry<bool> SetLayout;
         internal static ConfigEntry<string> LastLoadedConfig;
         internal static ConfigEntry<KeyboardShortcut> RestartKey;
         internal static ConfigFile cfg;
+
+        Harmony harmony = new("tairasoul.vaproxy.speedrunning");
         private bool init = false;
 
         private void Awake()
@@ -44,6 +49,7 @@ namespace SpeedrunningUtils
             RestartKey = cfg.Bind("Keybinds", "Restart keybind", new KeyboardShortcut(KeyCode.P), "Keybind to restart from the beginning of the game.");
             VisualisingHitboxes = VisualizeHitboxesByDefault.Value;
             Log = Logger;
+            harmony.PatchAll();
             Log.LogInfo("SpeedrunningUtils awake.");
             SceneManager.sceneLoaded += (Scene scene, LoadSceneMode mode) => {
                 if (scene.name == "Menu") {
@@ -52,6 +58,11 @@ namespace SpeedrunningUtils
                         toggle.isOn = false;
                         toggle.onValueChanged.Invoke(false);
                     }
+                    PlayerPrefs.SetInt("StaticAI", 1);
+                    PlayerPrefs.SetInt("DynamicAI", 1);
+                    PlayerPrefs.SetInt("Shadow", 1);
+                    PlayerPrefs.SetInt("Graphics", 1);
+                    QualitySettings.SetQualityLevel(0);
                 }
             };
         }

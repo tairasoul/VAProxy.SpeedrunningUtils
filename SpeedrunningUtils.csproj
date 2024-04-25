@@ -72,6 +72,9 @@
     <Reference Include="UnityEngine.UnityWebRequestWWWModule">
       <HintPath>../../../.local/share/Steam/steamapps/common/VA Proxy Demo/VA-Proxy_Data\Managed\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
     </Reference>
+    <Reference Include="0Harmony">
+        <HintPath>/home/eva/.local/share/Steam/steamapps/common/VA Proxy Demo/BepInEx/core/0Harmony.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
