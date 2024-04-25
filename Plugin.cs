@@ -8,6 +8,9 @@ using System;
 using BepInEx.Configuration;
 using System.IO;
 using Devdog.General.UI;
+using UnityEngine.SceneManagement;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace SpeedrunningUtils
 {
@@ -15,7 +18,7 @@ namespace SpeedrunningUtils
     {
         internal const string GUID = "tairasoul.vaproxy.speedrunning";
         internal const string Name = "SpeedrunningUtils";
-        internal const string Version = "3.0.2";
+        internal const string Version = "3.0.3";
     }
 
     [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
@@ -42,6 +45,15 @@ namespace SpeedrunningUtils
             VisualisingHitboxes = VisualizeHitboxesByDefault.Value;
             Log = Logger;
             Log.LogInfo("SpeedrunningUtils awake.");
+            SceneManager.sceneLoaded += (Scene scene, LoadSceneMode mode) => {
+                if (scene.name == "Menu") {
+                    SettingsMainMenu menu = GameObject.Find("Canvas").Find("Optimize").GetComponent<SettingsMainMenu>();
+                    foreach (Toggle toggle in menu.toggles) {
+                        toggle.isOn = false;
+                        toggle.onValueChanged.Invoke(false);
+                    }
+                }
+            };
         }
 
         private void Start()
@@ -67,7 +79,7 @@ namespace SpeedrunningUtils
                 DontDestroyOnLoad(Utils);
                 SpeedrunnerUtils utils = Utils.AddComponent<SpeedrunnerUtils>();
                 utils.enabled = true;
-                Option[] options = [];
+                Option[] options = new Option[1];
                 Option VisualizeOption = new()
                 {
                     Create = (GameObject page) =>
@@ -94,7 +106,7 @@ namespace SpeedrunningUtils
                 };
                 options = options.Append(VisualizeOption);
                 Settings.API.RegisterMod("tairasoul.speedrunning.utils", "SpeedrunningUtils", options);
-                Option[] SplitOptions = [];
+                Option[] SplitOptions = new Option[1];
                 string dir = $"{Paths.PluginPath}/SpeedrunningUtils.Splits";
                 if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
                 foreach (string file in Directory.EnumerateFiles(dir))
@@ -124,7 +136,9 @@ namespace SpeedrunningUtils
                             button.SetParent(page.Find("Viewport/Content"), false);
                         }
                     };
-                    SplitOptions = [.. SplitOptions, opt];
+                    List<Option> options1 = SplitOptions.ToList();
+                    options1.Add(opt);
+                    SplitOptions = options1.ToArray();
                 }
                 static void CreationCallback(GameObject page)
                 {
