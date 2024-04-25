@@ -7,7 +7,7 @@ namespace SpeedrunningUtils
 {
     internal class VisualiserComponent : MonoBehaviour
     {
-        private readonly List<Bounds> boundColliders = []; // List to store bounds
+        private readonly List<Bounds> boundColliders = new();
         private void Update()
         {
             if (Plugin.VisualisingHitboxes)

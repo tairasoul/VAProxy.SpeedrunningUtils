@@ -7,6 +7,8 @@ using System.Collections;
 using BepInEx;
 using System.Reflection;
 using SettingsAPI;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace SpeedrunningUtils
 {
@@ -69,14 +71,14 @@ namespace SpeedrunningUtils
     internal class SpeedrunnerUtils : MonoBehaviour
     {
         private string CurrentScene = "Intro";
-        internal static CustomSplit[] splits = [];
+        internal static CustomSplit[] splits = new CustomSplit[0];
         private int SplitIndex = 0;
         private bool RestartKeyDown = false;
 
         internal void Clear()
         {
             //Livesplit.SendCommand("clearsplits");
-            splits = [];
+            splits = new CustomSplit[0];
         }
 
         private void Awake()
@@ -433,10 +435,12 @@ namespace SpeedrunningUtils
 
         internal static Condition[] ParseConditionArray(JArray Conditions)
         {
-            Condition[] conditions = [];
+            Condition[] conditions = new Condition[0];
             foreach (JToken cond in Conditions)
             {
-                conditions = [.. conditions, ParseCondition(cond)];
+                List<Condition> conditions1 = conditions.ToList();
+                conditions1.Add(ParseCondition(cond));
+                conditions = conditions1.ToArray();
             }
             return conditions;
         }
@@ -497,7 +501,9 @@ namespace SpeedrunningUtils
                         splitHere = splitHere,
                         addToLayout = addToLayout
                     };
-                    SpeedrunnerUtils.splits = [.. SpeedrunnerUtils.splits, spl];
+                    List<CustomSplit> splitList = SpeedrunnerUtils.splits.ToList();
+                    splitList.Add(spl);
+                    SpeedrunnerUtils.splits = splitList.ToArray();
                     if (addToLayout && Plugin.SetLayout.Value)
                     {
                         Livesplit.SendCommand($"setsplitname {actualSplitIndex} {spl.SplitName}");
