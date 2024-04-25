@@ -105,6 +105,15 @@ namespace SpeedrunningUtils
             }
         }
 
+        private IEnumerator ResetTimer() {
+            while (GameObject.FindFirstObjectByType<SaveSlotSelect>() == null)
+                yield return new WaitForEndOfFrame();
+            SaveSlotSelect select = GameObject.FindObjectOfType<SaveSlotSelect>();
+            select.ClearSlotData(Plugin.CurrentSaveSlot);
+            PlayerPrefs.SetFloat("GameTime" + Plugin.CurrentSaveSlot, 0f);
+            select.slots[Plugin.CurrentSaveSlot].Check();
+        }
+
         private void Update()
         {
             if (Plugin.RestartKey.Value.IsDown())
@@ -113,9 +122,8 @@ namespace SpeedrunningUtils
                 {
                     RestartKeyDown = true;
                     SceneManager.LoadScene(1, LoadSceneMode.Single);
-                    SaveSlotSelect select = GameObject.FindObjectOfType<SaveSlotSelect>();
-                    select.ClearSlotData(Plugin.CurrentSaveSlot);
                     Livesplit.SendCommand("reset");
+                    StartCoroutine(ResetTimer());
                     SplitIndex = 0;
                 }
             }
