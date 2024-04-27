@@ -141,10 +141,10 @@ namespace SpeedrunningUtils
                     {
                         if (splitFulfilled && split.splitBounds.Value.Contains(GameObject.Find("S-105").transform.position))
                         {
-                            if (split.splitHere)
+                            if (split.Command != null)
                             {
-                                Plugin.Log.LogInfo("Splitting at split " + split.SplitName);
-                                Livesplit.SendCommand("startorsplit");
+                                Plugin.Log.LogInfo($"Executing command {split.Command} at split {split.SplitName}");
+                                Livesplit.SendCommand(split.Command);
                             }
                             SplitIndex++;
                         }
@@ -153,10 +153,10 @@ namespace SpeedrunningUtils
                     {
                         if (splitFulfilled)
                         {
-                            if (split.splitHere)
+                            if (split.Command != null)
                             {
-                                Plugin.Log.LogInfo("Splitting at split " + split.SplitName);
-                                Livesplit.SendCommand("startorsplit");
+                                Plugin.Log.LogInfo($"Executing command {split.Command} at split {split.SplitName}");
+                                Livesplit.SendCommand(split.Command);
                             }
                             SplitIndex++;
                         }
@@ -166,50 +166,10 @@ namespace SpeedrunningUtils
                 {
                     if (split.splitBounds.Value.Contains(GameObject.Find("S-105").transform.position))
                     {
-                        if (split.splitHere)
+                        if (split.Command != null)
                         {
-                            Plugin.Log.LogInfo("Splitting at split " + split.SplitName);
-                            Livesplit.SendCommand("startorsplit");
-                        }
-                        SplitIndex++;
-                    }
-                }
-                if (split.skipCondition != null)
-                {
-                    bool skipFulfilled = split.skipCondition.Fulfilled();
-                    if (split.skipBounds != null)
-                    {
-                        if (skipFulfilled && split.skipBounds.Value.Contains(GameObject.Find("S-105").transform.position))
-                        {
-                            if (split.splitHere)
-                            {
-                                Plugin.Log.LogInfo("Skipping split " + split.SplitName);
-                                Livesplit.SendCommand("skipsplit");
-                            }
-                            SplitIndex++;
-                        }
-                    }
-                    else
-                    {
-                        if (skipFulfilled)
-                        {
-                            if (split.splitHere)
-                            {
-                                Plugin.Log.LogInfo("Skipping split " + split.SplitName);
-                                Livesplit.SendCommand("skipsplit");
-                            }
-                            SplitIndex++;
-                        }
-                    }
-                }
-                else if (split.skipBounds != null)
-                {
-                    if (split.skipBounds.Value.Contains(GameObject.Find("S-105").transform.position))
-                    {
-                        if (split.splitHere)
-                        {
-                            Plugin.Log.LogInfo("Skipping split " + split.SplitName);
-                            Livesplit.SendCommand("skipsplit");
+                            Plugin.Log.LogInfo($"Executing command {split.Command} at split {split.SplitName}");
+                            Livesplit.SendCommand(split.Command);
                         }
                         SplitIndex++;
                     }
@@ -504,11 +464,9 @@ namespace SpeedrunningUtils
                     {
                         SplitName = (string)split["SplitName"],
                         splitCondition = ParseCondition(split["splitCondition"]),
-                        skipCondition = ParseCondition(split["skipCondition"]),
                         splitBounds = ParseBounds(split["splitBounds"]),
-                        skipBounds = ParseBounds(split["skipBounds"]),
-                        splitHere = splitHere,
-                        addToLayout = addToLayout
+                        addToLayout = addToLayout,
+                        Command = (string)split["Command"]
                     };
                     List<CustomSplit> splitList = SpeedrunnerUtils.splits.ToList();
                     splitList.Add(spl);
@@ -529,14 +487,12 @@ namespace SpeedrunningUtils
         }
     }
 
-    internal class CustomSplit
+    internal struct CustomSplit
     {
         internal Bounds? splitBounds;
         internal Condition? splitCondition;
-        internal Bounds? skipBounds;
-        internal Condition? skipCondition;
         internal string SplitName;
-        internal bool splitHere;
+        internal string Command;
         internal bool addToLayout;
     }
 }
