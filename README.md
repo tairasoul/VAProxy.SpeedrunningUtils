@@ -35,6 +35,10 @@ splitBounds and splitCondition, once fulfilled, will send the command (or move o
 
 Command is the command to send. Do not put this key-value pair in if you don't want to send anything.
 
+The commands you can send are found [here](https://github.com/LiveSplit/LiveSplit/blob/master/src/LiveSplit.Core/Server/CommandServer.cs#L155).
+
+Each `case "string":` line represents a command. The text in quotes is the command.
+
 addToLayout means it will be added to your LiveSplit layout. This will replace whatever you have at that index with this split name.
 
 addToLayout defaults to false.
