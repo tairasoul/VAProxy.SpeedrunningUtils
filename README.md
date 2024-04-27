@@ -26,22 +26,20 @@ Each split is formatted like this:
   "skipCondition": condition,
   "splitBounds": bounds,
   "skipBounds": bounds,
-  "splitHere": "true", // or "false"
   "addToLayout": "true", // or "false"
+  "Command": "startorsplit"
 }
 ```
 
-skipBounds and skipCondition are optional, however you need either splitCondition or splitBounds.
+splitBounds and splitCondition, once fulfilled, will send the command (or move on to the next split's conditions if not decalred).
 
-skipBounds and skipCondition, once fulfilled, will skip that split if splitHere is true.
-
-splitBounds and splitCondition, once fulfilled, will split.
-
-splitHere means this split will end up sending startorsplit once requirements are met.
+Command is the command to send. Do not put this key-value pair in if you don't want to send anything.
 
 addToLayout means it will be added to your LiveSplit layout. This will replace whatever you have at that index with this split name.
 
-addToLayout defaults to false, and splitHere defaults to true if you omit them.
+addToLayout defaults to false.
+
+Command defaults to not being anything.
 
 ### Condition formatting
 
