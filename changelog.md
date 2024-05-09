@@ -1,5 +1,5 @@
 # Changelog
 
-Now uses commands instead of "splitHere".
+ValueType is no longer needed. No clue why I added that, but it's gone now.
 
-You give it a command to send when the split is done, do not declare Command if you don't want it to do anything.
+Fix Component-based splitting.

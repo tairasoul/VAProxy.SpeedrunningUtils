@@ -56,7 +56,6 @@ A condition is formatted like this:
   "Component": "ComponentName", // optional
   "Property": "property", // property to check
   "Value": "value" // value to compare property to, must always be double quoted.
-  "ValueType": "bool", // type of value. can be string, int, bool or float.
   "Comparison": "==" // valid comparisons are == < > >= and <=
 }
 ```

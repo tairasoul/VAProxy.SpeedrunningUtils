@@ -19,7 +19,7 @@ namespace SpeedrunningUtils
     {
         internal const string GUID = "tairasoul.vaproxy.speedrunning";
         internal const string Name = "SpeedrunningUtils";
-        internal const string Version = "3.0.4";
+        internal const string Version = "3.0.6";
     }
 
     [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
@@ -90,7 +90,6 @@ namespace SpeedrunningUtils
                 DontDestroyOnLoad(Utils);
                 SpeedrunnerUtils utils = Utils.AddComponent<SpeedrunnerUtils>();
                 utils.enabled = true;
-                Option[] options = new Option[1];
                 Option VisualizeOption = new()
                 {
                     Create = (GameObject page) =>
@@ -98,6 +97,7 @@ namespace SpeedrunningUtils
                         try
                         {
                             GameObject Toggle = ComponentUtils.CreateToggle("Visualize Split Colliders", "speedrunning.visualise.splitcolliders");
+                            Log.LogInfo("Created toggle.");
                             Toggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-396.9787f, 122.7571f);
                             Toggle.transform.localScale = new Vector3(1.9268f, 1.9268f, 1.9268f);
                             Toggle.Find("Label").GetComponent<RectTransform>().anchoredPosition = new Vector2(32.7437f, 0);
@@ -115,9 +115,8 @@ namespace SpeedrunningUtils
                         }
                     }
                 };
-                options = options.Append(VisualizeOption);
-                Settings.API.RegisterMod("tairasoul.speedrunning.utils", "SpeedrunningUtils", options);
-                Option[] SplitOptions = new Option[1];
+                Settings.API.RegisterMod("tairasoul.speedrunning.utils", "SpeedrunningUtils", new Option[] {VisualizeOption});
+                Option[] SplitOptions = Array.Empty<Option>();
                 string dir = $"{Paths.PluginPath}/SpeedrunningUtils.Splits";
                 if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
                 foreach (string file in Directory.EnumerateFiles(dir))
@@ -144,16 +143,14 @@ namespace SpeedrunningUtils
                             LayoutElement elem = button.AddComponent<LayoutElement>();
                             elem.minWidth = 50f;
                             elem.minHeight = 50f;
-                            button.SetParent(page.Find("Viewport/Content"), false);
+                            button.SetParent(page.Find("Viewport").Find("Content"), false);
                         }
                     };
-                    List<Option> options1 = SplitOptions.ToList();
-                    options1.Add(opt);
-                    SplitOptions = options1.ToArray();
+                    SplitOptions = SplitOptions.AddToArray(opt);
                 }
                 static void CreationCallback(GameObject page)
                 {
-                    GameObject ScrollbarVertical = GameObject.Find("MAINMENU/Canvas/Pages/Inventory/Content/__INVENTORY_CONTAINER/Container/InventorySlots/Scrollbar Vertical");
+                    GameObject ScrollbarVertical = GameObject.Find("MAINMENU").Find("Canvas").Find("Pages").Find("Inventory").Find("Content").Find("__INVENTORY_CONTAINER").Find("Container").Find("InventorySlots").Find("Scrollbar Vertical");
                     GameObject ScrollVertical = ScrollbarVertical.Instantiate();
                     ScrollVertical.name = "Scrollbar Vertical";
                     ScrollVertical.SetParent(page, false);
