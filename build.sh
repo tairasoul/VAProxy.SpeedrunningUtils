@@ -8,6 +8,6 @@ cp SettingsAPI.dll ../../../SpeedrunningUtils
 cd ..
 cd ..
 cd ..
-rm -rf SpeedrunningUtils.zip
-tar -c -f SpeedrunningUtils.zip SpeedrunningUtils
+rm -rf SpeedrunningUtils.tar.xz
+tar -c -f SpeedrunningUtils.tar.xz SpeedrunningUtils
 rm -rf SpeedrunningUtils
