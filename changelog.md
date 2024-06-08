@@ -1,3 +1,3 @@
 # Changelog
 
-Automatically un-limit FPS.
+Now uses UIPageFramework.
