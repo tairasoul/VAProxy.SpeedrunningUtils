@@ -6,9 +6,9 @@ using Newtonsoft.Json.Linq;
 using System.Collections;
 using BepInEx;
 using System.Reflection;
-using SettingsAPI;
 using System.Linq;
 using System.Collections.Generic;
+using UIWindowPageFramework;
 
 namespace SpeedrunningUtils
 {
@@ -117,6 +117,7 @@ namespace SpeedrunningUtils
 
 		private void Update()
 		{
+			Application.targetFrameRate = 99999;
 			if (Plugin.RestartKey.Value.IsDown())
 			{
 				if (!RestartKeyDown)

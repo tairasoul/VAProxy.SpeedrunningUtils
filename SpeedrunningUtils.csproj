@@ -16,8 +16,8 @@
     <Reference Include="BepInEx">
       <HintPath>../../../.local/share/Steam/steamapps/common/VA Proxy Demo\BepInEx\core\BepInEx.dll</HintPath>
     </Reference>
-    <Reference Include="SettingsAPI">
-      <HintPath>../../../Downloads/SettingsAPI/SettingsAPI.dll</HintPath>
+    <Reference Include="UIWindowPageFramework">
+      <HintPath>../Dlls/UIWindowPageFramework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
