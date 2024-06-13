@@ -65,6 +65,10 @@ namespace SpeedrunningUtils
 			Log.LogInfo("SpeedrunningUtils awake.");
 			SceneManager.sceneLoaded += (Scene scene, LoadSceneMode mode) => {
 				if (scene.name == "Menu") {
+					if (Recording) 
+					{
+						StartCoroutine(utils.StopRecording());
+					}
 					StartCoroutine(doRecordingAttachment());
 					SettingsMainMenu menu = GameObject.Find("Canvas").Find("Optimize").GetComponent<SettingsMainMenu>();
 					foreach (Toggle toggle in menu.toggles) {
@@ -160,10 +164,6 @@ namespace SpeedrunningUtils
 						break;
 					}
 					yield return null;
-				}
-				if (Recording) 
-				{
-					StartCoroutine(utils.StopRecording());
 				}
 				Log.LogInfo("Starting recording on OBS.");
 				Recording = true;
