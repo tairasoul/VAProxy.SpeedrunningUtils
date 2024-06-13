@@ -191,7 +191,7 @@ namespace SpeedrunningUtils
 			}
 		}
 		
-		private IEnumerator StopRecording() 
+		internal IEnumerator StopRecording() 
 		{
 			yield return new WaitForSeconds(3);
 			_StopRecording();
