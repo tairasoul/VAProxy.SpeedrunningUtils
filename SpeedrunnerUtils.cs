@@ -197,7 +197,7 @@ namespace SpeedrunningUtils
 			_StopRecording();
 		}
 		
-		private async Task _StopRecording() 
+		internal async Task _StopRecording() 
 		{
 			if (Plugin.Recording) 
 			{
