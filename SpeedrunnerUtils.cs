@@ -9,6 +9,8 @@ using System.Reflection;
 using System.Linq;
 using System.Collections.Generic;
 using UIWindowPageFramework;
+using System.Threading.Tasks;
+using ObsWebSocket.Net.Protocol.Requests;
 
 namespace SpeedrunningUtils
 {
@@ -115,7 +117,7 @@ namespace SpeedrunningUtils
 			select.slots[Plugin.CurrentSaveSlot].Check();
 		}
 
-		private void Update()
+		private async Task Update()
 		{
 			Application.targetFrameRate = 99999;
 			if (Plugin.RestartKey.Value.IsDown())
@@ -135,25 +137,40 @@ namespace SpeedrunningUtils
 			}
 			if (CurrentScene != "Intro" && CurrentScene != "Menu")
 			{
-				CustomSplit split = splits[SplitIndex];
-				if (split.splitCondition != null)
+				if (SplitIndex < splits.Length) 
 				{
-					bool splitFulfilled = split.splitCondition.Fulfilled();
-					if (split.splitBounds != null)
+					CustomSplit split = splits[SplitIndex];
+					if (split.splitCondition != null)
 					{
-						if (splitFulfilled && split.splitBounds.Value.Contains(GameObject.Find("S-105").transform.position))
+						bool splitFulfilled = split.splitCondition.Fulfilled();
+						if (split.splitBounds != null)
 						{
-							if (split.Command != null)
+							if (splitFulfilled && split.splitBounds.Value.Contains(GameObject.Find("S-105").transform.position))
 							{
-								Plugin.Log.LogInfo($"Executing command {split.Command} at split {split.SplitName}");
-								Livesplit.SendCommand(split.Command);
+								if (split.Command != null)
+								{
+									Plugin.Log.LogInfo($"Executing command {split.Command} at split {split.SplitName}");
+									Livesplit.SendCommand(split.Command);
+								}
+								SplitIndex++;
 							}
-							SplitIndex++;
+						}
+						else
+						{
+							if (splitFulfilled)
+							{
+								if (split.Command != null)
+								{
+									Plugin.Log.LogInfo($"Executing command {split.Command} at split {split.SplitName}");
+									Livesplit.SendCommand(split.Command);
+								}
+								SplitIndex++;
+							}
 						}
 					}
-					else
+					else if (split.splitBounds != null)
 					{
-						if (splitFulfilled)
+						if (split.splitBounds.Value.Contains(GameObject.Find("S-105").transform.position))
 						{
 							if (split.Command != null)
 							{
@@ -164,18 +181,29 @@ namespace SpeedrunningUtils
 						}
 					}
 				}
-				else if (split.splitBounds != null)
+				else 
 				{
-					if (split.splitBounds.Value.Contains(GameObject.Find("S-105").transform.position))
+					if (Plugin.WebsocketConnected) 
 					{
-						if (split.Command != null)
-						{
-							Plugin.Log.LogInfo($"Executing command {split.Command} at split {split.SplitName}");
-							Livesplit.SendCommand(split.Command);
-						}
-						SplitIndex++;
+						StartCoroutine(StopRecording());
 					}
 				}
+			}
+		}
+		
+		private IEnumerator StopRecording() 
+		{
+			yield return new WaitForSeconds(3);
+			_StopRecording();
+		}
+		
+		private async Task _StopRecording() 
+		{
+			if (Plugin.Recording) 
+			{
+				Plugin.Recording = false;
+				StopRecordResponse resp = await Plugin.websocket.StopRecord();
+				Plugin.Log.LogInfo($"Saved new recording. Filename: {resp.OutputPath}");
 			}
 		}
 	}
