@@ -66,9 +66,7 @@ namespace SpeedrunningUtils
 			SceneManager.sceneLoaded += (Scene scene, LoadSceneMode mode) => {
 				if (scene.name == "Menu") {
 					if (Recording) 
-					{
-						StartCoroutine(utils.StopRecording());
-					}
+						utils._StopRecording();
 					StartCoroutine(doRecordingAttachment());
 					SettingsMainMenu menu = GameObject.Find("Canvas").Find("Optimize").GetComponent<SettingsMainMenu>();
 					foreach (Toggle toggle in menu.toggles) {
