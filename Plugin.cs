@@ -11,6 +11,8 @@ using System.Linq;
 using System.Collections.Generic;
 using UIWindowPageFramework;
 using HarmonyLib;
+using System.Collections;
+using ObsWebSocket.Net;
 
 namespace SpeedrunningUtils
 {
@@ -18,7 +20,7 @@ namespace SpeedrunningUtils
 	{
 		internal const string GUID = "tairasoul.vaproxy.speedrunning";
 		internal const string Name = "SpeedrunningUtils";
-		internal const string Version = "3.1.0";
+		internal const string Version = "3.2.0";
 	}
 
 	[BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
@@ -34,9 +36,15 @@ namespace SpeedrunningUtils
 		internal static ConfigEntry<bool> SetLayout;
 		internal static ConfigEntry<string> LastLoadedConfig;
 		internal static ConfigEntry<KeyboardShortcut> RestartKey;
+		internal static ConfigEntry<string> WebsocketPassword;
+		internal static ConfigEntry<string> WebsocketURL;
+		internal static ConfigEntry<int> WebsocketPort;
+		internal static ConfigEntry<bool> EnableOBSWebsocket;
 		internal static ConfigFile cfg;
 		internal static SpeedrunnerUtils utils;
-
+		internal static ObsWebSocketClient websocket;
+		internal static bool Recording = false;
+		internal static bool WebsocketConnected = false;
 		Harmony harmony = new("tairasoul.vaproxy.speedrunning");
 		private bool init = false;
 
@@ -47,12 +55,17 @@ namespace SpeedrunningUtils
 			LastLoadedConfig = cfg.Bind("Speedrunning", "Last loaded config", "", "The config last loaded by SpeedrunningUtils.");
 			SetLayout = cfg.Bind("Speedrunning", "Set Layout", false, "Should SpeedrunningUtils forcibly set the layout where specified?");
 			RestartKey = cfg.Bind("Keybinds", "Restart keybind", new KeyboardShortcut(KeyCode.P), "Keybind to restart from the beginning of the game.");
+			EnableOBSWebsocket = cfg.Bind("OBS Integration", "Enable", false, "Enable OBS integration. Starts recording when you enter the save menu, stops 3 seconds after the run ends.");
+			WebsocketPassword = cfg.Bind("OBS Integration", "Password", "", "The password for the OBS Websocket Server. Leave empty if no password.");
+			WebsocketURL = cfg.Bind("OBS Integration", "Websocket URL", "127.0.0.1", "The URL for the server. Leave empty if you haven't changed anything.");
+			WebsocketPort = cfg.Bind("OBS Integration", "Websocket Port", 4455, "The port the websocket server is listening on.");
 			VisualisingHitboxes = VisualizeHitboxesByDefault.Value;
 			Log = Logger;
 			harmony.PatchAll();
 			Log.LogInfo("SpeedrunningUtils awake.");
 			SceneManager.sceneLoaded += (Scene scene, LoadSceneMode mode) => {
 				if (scene.name == "Menu") {
+					StartCoroutine(doRecordingAttachment());
 					SettingsMainMenu menu = GameObject.Find("Canvas").Find("Optimize").GetComponent<SettingsMainMenu>();
 					foreach (Toggle toggle in menu.toggles) {
 						toggle.isOn = false;
@@ -65,6 +78,13 @@ namespace SpeedrunningUtils
 					QualitySettings.SetQualityLevel(0);
 				}
 			};
+			if (WebsocketPassword.Value != "") {
+				websocket = new(WebsocketURL.Value, WebsocketPort.Value, WebsocketPassword.Value);
+			}
+			else 
+			{
+				websocket = new(WebsocketURL.Value, WebsocketPort.Value);
+			}
 		}
 
 		private void Start()
@@ -95,8 +115,61 @@ namespace SpeedrunningUtils
 				{
 					PageHandlers.Setup(window);
 				});
+				if (EnableOBSWebsocket.Value) 
+				{
+					Log.LogInfo("Connecting to OBS Websocket.");
+					//new Uri(WebsocketURL.Value), WebsocketPassword.Value
+					websocket.Connect();
+					websocket.OnConnected += () => 
+					{
+						Log.LogInfo("Connected to OBS Websocket!");
+						WebsocketConnected = true;
+					};
+				}
 				Log.LogInfo("SpeedrunningUtils initialized. Good luck speedrunning!");
 			}
+		}
+		internal IEnumerator doRecordingAttachment() 
+		{
+			if (EnableOBSWebsocket.Value) 
+			{
+				while (!WebsocketConnected)
+					yield return null;
+				GameObject? Canvas = GameObject.Find("Canvas");
+				while (true) 
+				{
+					if (Canvas == null) 
+					{
+						Canvas = GameObject.Find("Canvas").Find("SlotSelect");
+						yield return null;
+					}
+					else
+					{
+						break;
+					}
+				}
+				GameObject? SlotSelect = Canvas.Find("SlotSelect");
+				while (true) 
+				{
+					if (SlotSelect == null) 
+					{
+						SlotSelect = Canvas.Find("SlotSelect");
+						yield return null;
+					}
+					else if (SlotSelect.activeSelf)
+					{
+						break;
+					}
+					else 
+					{
+						yield return null;
+					}
+				}
+				Log.LogInfo("Starting recording on OBS.");
+				Recording = true;
+				websocket.StartRecord();
+			}
+			yield return null;
 		}
 	}
 	
