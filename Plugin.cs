@@ -20,7 +20,7 @@ namespace SpeedrunningUtils
 	{
 		internal const string GUID = "tairasoul.vaproxy.speedrunning";
 		internal const string Name = "SpeedrunningUtils";
-		internal const string Version = "3.2.0";
+		internal const string Version = "3.2.1";
 	}
 
 	[BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
@@ -154,16 +154,16 @@ namespace SpeedrunningUtils
 					if (SlotSelect == null) 
 					{
 						SlotSelect = Canvas.Find("SlotSelect");
-						yield return null;
 					}
 					else if (SlotSelect.activeSelf)
 					{
 						break;
 					}
-					else 
-					{
-						yield return null;
-					}
+					yield return null;
+				}
+				if (Recording) 
+				{
+					StartCoroutine(utils.StopRecording());
 				}
 				Log.LogInfo("Starting recording on OBS.");
 				Recording = true;
