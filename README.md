@@ -5,7 +5,7 @@ Simple speedrunning utils for VA Proxy.
 ~~Needs [LiveSplit.Server.Modified](https://github.com/tairasoul/LiveSplit.Server.Modified) to create splits if they aren't there already.~~
 No longer needs LiveSplit.Serever.Modified to function, but it is needed if you have ANY elements with addToLayout set to true.
 
-Also needs [VAProxy.PageFramework](https://github.com/tairasoul/VAProxy.PageFramework) to integrate into the actual game UI for settings. It is included by default though.
+Also needs [VAProxy.PageFramework](https://github.com/tairasoul/VAProxy.PageFramework) to integrate into the actual game UI for settings.
 
 If you want some pre-made configs, go to [SpeedrunConfigs repo](https://github.com/tairasoul/VAProxy.SpeedrunConfigs)
 
