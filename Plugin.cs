@@ -13,6 +13,7 @@ using UIWindowPageFramework;
 using HarmonyLib;
 using System.Collections;
 using ObsWebSocket.Net;
+using MainMenuSettings;
 
 namespace SpeedrunningUtils
 {
@@ -20,7 +21,7 @@ namespace SpeedrunningUtils
 	{
 		internal const string GUID = "tairasoul.vaproxy.speedrunning";
 		internal const string Name = "SpeedrunningUtils";
-		internal const string Version = "3.2.1";
+		internal const string Version = "3.2.2";
 	}
 
 	[BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
@@ -43,6 +44,7 @@ namespace SpeedrunningUtils
 		internal static ConfigFile cfg;
 		internal static SpeedrunnerUtils utils;
 		internal static ObsWebSocketClient websocket;
+		internal static Text MainMenuActiveText;
 		internal static bool Recording = false;
 		internal static bool WebsocketConnected = false;
 		Harmony harmony = new("tairasoul.vaproxy.speedrunning");
@@ -87,6 +89,7 @@ namespace SpeedrunningUtils
 			{
 				websocket = new(WebsocketURL.Value, WebsocketPort.Value);
 			}
+			Livesplit.StartSocket();
 		}
 
 		private void Start()
@@ -128,6 +131,24 @@ namespace SpeedrunningUtils
 						WebsocketConnected = true;
 					};
 				}
+				ToggleOption Visualize = new()
+				{
+					defaultState = VisualizeHitboxesByDefault.Value,
+					Id = "tairasoul.speedrunningutils.visualize",
+					Text = "Visualize Bounds",
+					Toggled = (bool toggled) =>
+					{
+						VisualisingHitboxes = toggled;
+						VisualizeHitboxesByDefault.Value = toggled;
+					}
+				};
+				ModOptions opts = new() 
+				{
+					toggles = new ToggleOption[] { Visualize },
+					buttons = MenuHandlers.CreateSplitButtons(),
+					CreationCallback = MenuHandlers.CreateActiveText
+				};
+				MenuSettings.RegisterMod("SpeedrunningUtils", "tairasoul.speedrunningutils", opts);
 				Log.LogInfo("SpeedrunningUtils initialized. Good luck speedrunning!");
 			}
 		}
@@ -170,7 +191,65 @@ namespace SpeedrunningUtils
 			yield return null;
 		}
 	}
-	
+	static class MenuHandlers 
+	{
+		internal static ButtonOption[] CreateSplitButtons() 
+		{
+			string dir = $"{Paths.PluginPath}/SpeedrunningUtils.Splits";
+			if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+			string[] files = Directory.EnumerateFiles(dir).ToArray();
+			ButtonOption[] options = {};
+			ButtonOption opt = new()
+			{
+				Id = $"tairasoul.speedrunningutils.splits.reconnect",
+				Text = "Reconnect to Livesplit",
+				Clicked = () =>
+				{
+					Livesplit.StartSocket();
+				}
+			};
+			options = options.Append(opt).ToArray();
+			foreach (string file in files) 
+			{
+				options = options.Append(CreateSplitButton(file)).ToArray();
+			}
+			return options;
+		}
+		
+		private static ButtonOption CreateSplitButton(string file) 
+		{
+			ButtonOption opt = new()
+			{
+				Id = $"tairasoul.speedrunningutils.split.{file}",
+				Text = $"Split file {Path.GetFileName(file)}",
+				Clicked = () =>
+				{
+					Plugin.LastLoadedConfig.Value = Path.GetFileName(file);
+					Plugin.utils.Clear();
+					SplitLoader.LoadSplits(file);
+					Plugin.MainMenuActiveText.text = $"Active: {Path.GetFileName(file)}";
+				}
+			};
+			return opt;
+		}
+		
+		internal static void CreateActiveText(GameObject page) 
+		{
+			GameObject Text = new("ActiveText");
+			RectTransform txtt = Text.AddComponent<RectTransform>();
+			txtt.sizeDelta = new(220.05f, 91.79f);
+			Text txt = Text.AddComponent<Text>();
+			txt.text = $"Active: {Plugin.LastLoadedConfig.Value}";
+			txt.font = MenuComponents.GetFont("Arial");
+			txt.fontSize = 15;
+			txt.alignment = TextAnchor.UpperLeft;
+			Text.SetParent(page, true);
+			txtt.anchoredPosition3D = new(192.1614f, 83.2671f, 0);
+			txtt.localScale = new(1, 1, 1);
+			txtt.localRotation = new(0, 0, 0, 1);
+			Plugin.MainMenuActiveText = txt;
+		}
+	}
 	public static class PageHandlers 
 	{
 		static T Find<T>(Func<T, bool> predicate)
