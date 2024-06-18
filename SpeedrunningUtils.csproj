@@ -19,6 +19,9 @@
     <Reference Include="UIWindowPageFramework">
       <HintPath>../Dlls/UIWindowPageFramework.dll</HintPath>
     </Reference>
+    <Reference Include="MainMenuSettings">
+      <HintPath>../Dlls/MainMenuSettings.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />

@@ -88,7 +88,6 @@ namespace SpeedrunningUtils
 		{
 			Plugin.Log.LogInfo("SpeedrunnerUtils component awake.");
 			SceneManager.activeSceneChanged += OnSceneChanged;
-			Livesplit.StartSocket();
 			if (Plugin.LastLoadedConfig.Value != "")
 			{
 				SplitLoader.LoadSplits($"{Paths.PluginPath}/SpeedrunningUtils.Splits/{Plugin.LastLoadedConfig.Value}");
