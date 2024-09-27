@@ -5,7 +5,7 @@ using UnityEngine;
 namespace SpeedrunningUtils
 
 {
-    internal class VisualiserComponent : MonoBehaviour
+    public class VisualiserComponent : MonoBehaviour
     {
         private readonly List<Bounds> boundColliders = new();
         private void Update()

@@ -71,7 +71,7 @@ namespace SpeedrunningUtils
 			return null;
 		}
 	}
-	internal class SpeedrunnerUtils : MonoBehaviour
+	public class SpeedrunnerUtils : MonoBehaviour
 	{
 		private string CurrentScene = "Intro";
 		internal static CustomSplit[] splits = new CustomSplit[0];
@@ -207,20 +207,20 @@ namespace SpeedrunningUtils
 		}
 	}
 
-	internal class Condition
+	public class Condition
 	{
-		internal string Name;
-		internal string Path;
-		internal string Property;
-		internal string Value;
-		internal string Comparison;
-		internal string? ComponentName;
+		public string Name;
+		public string Path;
+		public string Property;
+		public string Value;
+		public string Comparison;
+		public string? ComponentName;
 		private object ParseValue(object value, object conversionTarget)
 		{
 			return Convert.ChangeType(value, conversionTarget.GetType());
 		}
 
-		internal bool Fulfilled()
+		public bool Fulfilled()
 		{
 			if (ComponentName != null)
 			{
@@ -465,12 +465,12 @@ namespace SpeedrunningUtils
 		}
 	}
 
-	internal struct CustomSplit
+	public struct CustomSplit
 	{
-		internal Bounds? splitBounds;
-		internal Condition? splitCondition;
-		internal string SplitName;
-		internal string Command;
-		internal bool addToLayout;
+		public Bounds? splitBounds;
+		public Condition? splitCondition;
+		public string SplitName;
+		public string Command;
+		public bool addToLayout;
 	}
 }

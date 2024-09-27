@@ -32,7 +32,7 @@ namespace SpeedrunningUtils
 		internal static bool VisualisingHitboxes = false;
 
 		internal static int CurrentSaveSlot = 0;
-		internal static VisualiserComponent Visualiser;
+		public static VisualiserComponent Visualiser;
 		internal static ConfigEntry<bool> VisualizeHitboxesByDefault;
 		internal static ConfigEntry<bool> SetLayout;
 		internal static ConfigEntry<string> LastLoadedConfig;

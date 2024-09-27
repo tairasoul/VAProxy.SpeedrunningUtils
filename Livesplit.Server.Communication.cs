@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SpeedrunningUtils
 {
-    internal class Livesplit
+    public class Livesplit
     {
         private static TcpClient _client;
         private static readonly int ServerPort = 16834;
