@@ -201,7 +201,7 @@ namespace SpeedrunningUtils
 			if (Plugin.Recording) 
 			{
 				Plugin.Recording = false;
-				StopRecordResponse resp = await Plugin.websocket.StopRecord();
+				StopRecordResponse resp = await SPData.websocket.StopRecord();
 				Plugin.Log.LogInfo($"Saved new recording. Filename: {resp.OutputPath}");
 			}
 		}
