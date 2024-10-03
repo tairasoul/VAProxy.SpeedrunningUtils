@@ -2,18 +2,15 @@
 using BepInEx.Logging;
 using UnityEngine;
 using UnityEngine.UI;
-using System;
 using BepInEx.Configuration;
-using System.IO;
 using Devdog.General.UI;
 using UnityEngine.SceneManagement;
-using System.Linq;
-using System.Collections.Generic;
 using UIWindowPageFramework;
 using HarmonyLib;
 using System.Collections;
 using ObsWebSocket.Net;
 using MainMenuSettings;
+using System.Reflection;
 
 namespace SpeedrunningUtils
 {
@@ -21,16 +18,20 @@ namespace SpeedrunningUtils
 	{
 		internal const string GUID = "tairasoul.vaproxy.speedrunning";
 		internal const string Name = "SpeedrunningUtils";
-		internal const string Version = "3.2.2";
+		internal const string Version = "3.2.4";
 	}
 
 	[BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
 	public class Plugin : BaseUnityPlugin
 	{
+		Harmony harmony;
+		private bool init = false;
+		internal static Text MainMenuActiveText;
+		internal static bool Recording = false;
+		internal static bool WebsocketConnected = false;
 		public static ManualLogSource Log;
 		internal static GameObject ColliderStorage;
 		internal static bool VisualisingHitboxes = false;
-
 		internal static int CurrentSaveSlot = 0;
 		public static VisualiserComponent Visualiser;
 		internal static ConfigEntry<bool> VisualizeHitboxesByDefault;
@@ -43,12 +44,43 @@ namespace SpeedrunningUtils
 		internal static ConfigEntry<bool> EnableOBSWebsocket;
 		internal static ConfigFile cfg;
 		internal static SpeedrunnerUtils utils;
-		internal static ObsWebSocketClient websocket;
-		internal static Text MainMenuActiveText;
-		internal static bool Recording = false;
-		internal static bool WebsocketConnected = false;
-		Harmony harmony = new("tairasoul.vaproxy.speedrunning");
-		private bool init = false;
+		public Plugin() 
+		{
+			LoadRequiredAssemblies();
+		}
+		private void LoadAssemblyIfNeeded(string assemblyName)
+		{
+			if (AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetName().Name == assemblyName))
+			{
+				Logger.LogInfo($"{assemblyName} is already loaded.");
+				return;
+			}
+			string resource = $"vap-sru.libraries.{assemblyName}.dll";
+
+			using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resource);
+			if (stream == null)
+			{
+				Logger.LogError($"Failed to find embedded resource: {resource}");
+				return;
+			}
+
+			byte[] assemblyData = new byte[stream.Length];
+			stream.Read(assemblyData, 0, assemblyData.Length);
+
+			Assembly.Load(assemblyData);
+			Logger.LogInfo($"{assemblyName} loaded successfully.");
+		}
+		
+		private void LoadRequiredAssemblies() 
+		{
+			string[] assemblies = [
+				"TcpSharp", "System.ValueTuple", "System.Threading.Tasks.Extensions", "System.Text.Json", "System.Text.Encodings.Web", "System.Runtime.CompilerServices.Unsafe",
+				"System.Numerics.Vectors", "System.Memory", "System.Collections.Immutable", "System.Buffers", "ObsWebSocket.Net", "Newtonsoft.Json", "Microsoft.NET.StringTools",
+				"Microsoft.Bcl.HashCode", "Microsoft.Bcl.AsyncInterfaces", "MessagePack", "MessagePack.Annotations"
+			];
+			foreach (string assembly in assemblies)
+				LoadAssemblyIfNeeded(assembly);
+		}
 
 		private void Awake()
 		{
@@ -63,12 +95,13 @@ namespace SpeedrunningUtils
 			WebsocketPort = cfg.Bind("OBS Integration", "Websocket Port", 4455, "The port the websocket server is listening on.");
 			VisualisingHitboxes = VisualizeHitboxesByDefault.Value;
 			Log = Logger;
+			harmony = new("tairasoul.vaproxy.speedrunningutils");
 			harmony.PatchAll();
 			Log.LogInfo("SpeedrunningUtils awake.");
 			SceneManager.sceneLoaded += (Scene scene, LoadSceneMode mode) => {
 				if (scene.name == "Menu") {
 					if (Recording) 
-						utils._StopRecording();
+						Task.Run(utils._StopRecording);
 					StartCoroutine(doRecordingAttachment());
 					SettingsMainMenu menu = GameObject.Find("Canvas").Find("Optimize").GetComponent<SettingsMainMenu>();
 					foreach (Toggle toggle in menu.toggles) {
@@ -83,11 +116,11 @@ namespace SpeedrunningUtils
 				}
 			};
 			if (WebsocketPassword.Value != "") {
-				websocket = new(WebsocketURL.Value, WebsocketPort.Value, WebsocketPassword.Value);
+				SPData.websocket = new(WebsocketURL.Value, WebsocketPort.Value, WebsocketPassword.Value);
 			}
 			else 
 			{
-				websocket = new(WebsocketURL.Value, WebsocketPort.Value);
+				SPData.websocket = new(WebsocketURL.Value, WebsocketPort.Value);
 			}
 			Livesplit.StartSocket();
 		}
@@ -124,8 +157,8 @@ namespace SpeedrunningUtils
 				{
 					Log.LogInfo("Connecting to OBS Websocket.");
 					//new Uri(WebsocketURL.Value), WebsocketPassword.Value
-					websocket.Connect();
-					websocket.OnConnected += () => 
+					SPData.websocket.Connect();
+					SPData.websocket.OnConnected += () => 
 					{
 						Log.LogInfo("Connected to OBS Websocket!");
 						WebsocketConnected = true;
@@ -144,7 +177,7 @@ namespace SpeedrunningUtils
 				};
 				ModOptions opts = new() 
 				{
-					toggles = new ToggleOption[] { Visualize },
+					toggles = [Visualize],
 					buttons = MenuHandlers.CreateSplitButtons(),
 					CreationCallback = MenuHandlers.CreateActiveText
 				};
@@ -186,7 +219,7 @@ namespace SpeedrunningUtils
 				}
 				Log.LogInfo("Starting recording on OBS.");
 				Recording = true;
-				websocket.StartRecord();
+				SPData.websocket.StartRecord();
 			}
 			yield return null;
 		}

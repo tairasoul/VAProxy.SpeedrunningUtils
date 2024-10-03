@@ -1,3 +1,3 @@
 # Changelog
 
-You can now also change settings while in the main menu.
+Now bundles into a single .dll instead of a .tar.xz

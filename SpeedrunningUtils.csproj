@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
-    <RootNamespace>TestMod_VAP</RootNamespace>
+    <RootNamespace>vap-sru</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -78,6 +78,9 @@
     <Reference Include="0Harmony">
         <HintPath>/home/eva/.local/share/Steam/steamapps/common/VA Proxy Demo/BepInEx/core/0Harmony.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="libraries/*" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
