@@ -10,8 +10,7 @@ namespace SpeedrunningUtils
 		[HarmonyPrefix]
 		internal static void Star(HomeScreen __instance) {
 			SaveSlotSelect select = GameObject.FindObjectOfType<SaveSlotSelect>();
-			FieldInfo currentSlotInfo = typeof(SaveSlotSelect).GetField("currentSlot", BindingFlags.Instance | BindingFlags.NonPublic);
-			Plugin.CurrentSaveSlot = (int)currentSlotInfo.GetValue(select);
+			Plugin.CurrentSaveSlot = select.currentSlot;
 		}
 	}
 }
