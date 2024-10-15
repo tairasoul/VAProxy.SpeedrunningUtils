@@ -1,15 +1,10 @@
-﻿using System;
-using System.IO;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using Newtonsoft.Json.Linq;
 using System.Collections;
 using BepInEx;
 using System.Reflection;
-using System.Linq;
-using System.Collections.Generic;
 using UIWindowPageFramework;
-using System.Threading.Tasks;
 using ObsWebSocket.Net.Protocol.Requests;
 
 namespace SpeedrunningUtils
@@ -74,7 +69,7 @@ namespace SpeedrunningUtils
 	public class SpeedrunnerUtils : MonoBehaviour
 	{
 		private string CurrentScene = "Intro";
-		internal static CustomSplit[] splits = new CustomSplit[0];
+		internal static CustomSplit[] splits = [];
 		private int SplitIndex = 0;
 		private bool RestartKeyDown = false;
 
@@ -467,10 +462,6 @@ namespace SpeedrunningUtils
 					var split = splits[i];
 					Plugin.Log.LogInfo($"Loading split {(string)split["SplitName"]}");
 					bool addToLayout = false;
-					if (split.HasKey("addToLayout"))
-					{
-						addToLayout = (string)split["addToLayout"] == "true";
-					}
 					bool splitHere = true;
 					if (split.HasKey("splitHere"))
 					{
@@ -481,17 +472,12 @@ namespace SpeedrunningUtils
 						SplitName = (string)split["SplitName"],
 						splitCondition = ParseCondition(split["splitCondition"]),
 						splitBounds = ParseBounds(split["splitBounds"]),
-						addToLayout = addToLayout,
 						Command = (string)split["Command"]
 					};
 					List<CustomSplit> splitList = SpeedrunnerUtils.splits.ToList();
 					splitList.Add(spl);
 					SpeedrunnerUtils.splits = splitList.ToArray();
-					if (addToLayout && Plugin.SetLayout.Value)
-					{
-						Livesplit.SendCommand($"setsplitname {actualSplitIndex} {spl.SplitName}");
-					}
-					if (addToLayout || splitHere)
+					if (splitHere)
 						actualSplitIndex++;
 					Plugin.Log.LogInfo($"Loaded split {(string)split["SplitName"]}");
 				}
@@ -509,6 +495,5 @@ namespace SpeedrunningUtils
 		public Condition? splitCondition;
 		public string SplitName;
 		public string Command;
-		public bool addToLayout;
 	}
 }
