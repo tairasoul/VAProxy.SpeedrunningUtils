@@ -103,7 +103,7 @@ namespace SpeedrunningUtils
 					if (Recording) 
 						Task.Run(utils._StopRecording);
 					StartCoroutine(doRecordingAttachment());
-					SettingsMainMenu menu = GameObject.Find("Canvas").Find("Optimize").GetComponent<SettingsMainMenu>();
+					SettingsMainMenu menu = GameObject.Find("Canvas").Find("Settings").GetComponent<SettingsMainMenu>();
 					foreach (Toggle toggle in menu.toggles) {
 						toggle.isOn = false;
 						toggle.onValueChanged.Invoke(false);
