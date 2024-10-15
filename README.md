@@ -3,7 +3,7 @@
 Simple speedrunning utils for VA Proxy.
 
 ~~Needs [LiveSplit.Server.Modified](https://github.com/tairasoul/LiveSplit.Server.Modified) to create splits if they aren't there already.~~
-No longer needs LiveSplit.Server.Modified to function, but it is needed if you have ANY elements with addToLayout set to true.
+Unnecessary functionality, removed.
 
 Also needs [VAProxy.PageFramework](https://github.com/tairasoul/VAProxy.PageFramework) and [VAProxy.MainMenuSettings](https://github.com/tairasoul/VAProxy.MainMenuSettings) to integrate into the actual game UI for settings.
 
@@ -26,7 +26,6 @@ Each split is formatted like this:
   "skipCondition": condition,
   "splitBounds": bounds,
   "skipBounds": bounds,
-  "addToLayout": "true", // or "false"
   "Command": "startorsplit"
 }
 ```
