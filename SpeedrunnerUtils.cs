@@ -177,7 +177,7 @@ namespace SpeedrunningUtils
 						bool splitFulfilled = split.splitCondition.Fulfilled();
 						if (split.splitBounds != null)
 						{
-							if (splitFulfilled && split.splitBounds.Value.Contains(GameObject.Find("S-105").transform.position))
+							if (splitFulfilled && split.splitBounds.Value.Contains(GameObject.Find("S-105.1").transform.position))
 							{
 								if (split.Command != null)
 								{
@@ -202,7 +202,7 @@ namespace SpeedrunningUtils
 					}
 					else if (split.splitBounds != null)
 					{
-						if (split.splitBounds.Value.Contains(GameObject.Find("S-105").transform.position))
+						if (split.splitBounds.Value.Contains(GameObject.Find("S-105.1").transform.position))
 						{
 							if (split.Command != null)
 							{
