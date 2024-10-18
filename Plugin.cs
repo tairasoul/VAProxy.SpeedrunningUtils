@@ -8,7 +8,6 @@ using UnityEngine.SceneManagement;
 using UIWindowPageFramework;
 using HarmonyLib;
 using System.Collections;
-using ObsWebSocket.Net;
 using MainMenuSettings;
 using System.Reflection;
 
@@ -18,7 +17,7 @@ namespace SpeedrunningUtils
 	{
 		internal const string GUID = "tairasoul.vaproxy.speedrunning";
 		internal const string Name = "SpeedrunningUtils";
-		internal const string Version = "3.2.6";
+		internal const string Version = "3.2.8";
 	}
 
 	[BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
@@ -74,9 +73,7 @@ namespace SpeedrunningUtils
 		private void LoadRequiredAssemblies() 
 		{
 			string[] assemblies = [
-				"TcpSharp", "System.ValueTuple", "System.Threading.Tasks.Extensions", "System.Text.Json", "System.Text.Encodings.Web", "System.Runtime.CompilerServices.Unsafe",
-				"System.Numerics.Vectors", "System.Memory", "System.Collections.Immutable", "System.Buffers", "ObsWebSocket.Net", "Newtonsoft.Json", "Microsoft.NET.StringTools",
-				"Microsoft.Bcl.HashCode", "Microsoft.Bcl.AsyncInterfaces", "MessagePack", "MessagePack.Annotations"
+				"TcpSharp", "Newtonsoft.Json", "System.Memory", "System.Buffers", "System.ValueTuple", "WatsonWebsocket"
 			];
 			foreach (string assembly in assemblies)
 				LoadAssemblyIfNeeded(assembly);
@@ -115,14 +112,9 @@ namespace SpeedrunningUtils
 					QualitySettings.SetQualityLevel(0);
 				}
 			};
-			if (WebsocketPassword.Value != "") {
-				SPData.websocket = new(WebsocketURL.Value, WebsocketPort.Value, WebsocketPassword.Value);
-			}
-			else 
-			{
-				SPData.websocket = new(WebsocketURL.Value, WebsocketPort.Value);
-			}
 			Livesplit.StartSocket();
+			if (EnableOBSWebsocket.Value) 
+				OBS.ObsWebsocket.StartSocket();
 		}
 
 		private void Start()
@@ -149,21 +141,7 @@ namespace SpeedrunningUtils
 				utils = Utils.AddComponent<SpeedrunnerUtils>();
 				utils.enabled = true;
 				GameObject window = Framework.CreateWindow("SpeedrunningUtils");
-				Framework.RegisterWindow(window, (GameObject window) => 
-				{
-					PageHandlers.Setup(window);
-				});
-				if (EnableOBSWebsocket.Value) 
-				{
-					Log.LogInfo("Connecting to OBS Websocket.");
-					//new Uri(WebsocketURL.Value), WebsocketPassword.Value
-					SPData.websocket.Connect();
-					SPData.websocket.OnConnected += () => 
-					{
-						Log.LogInfo("Connected to OBS Websocket!");
-						WebsocketConnected = true;
-					};
-				}
+				Framework.RegisterWindow(window, PageHandlers.Setup);
 				ToggleOption Visualize = new()
 				{
 					defaultState = VisualizeHitboxesByDefault.Value,
@@ -187,41 +165,37 @@ namespace SpeedrunningUtils
 		}
 		internal IEnumerator doRecordingAttachment() 
 		{
-			if (EnableOBSWebsocket.Value) 
+			while (!WebsocketConnected)
+				yield return new WaitForEndOfFrame();
+			GameObject Canvas = GameObject.Find("Canvas");
+			while (true) 
 			{
-				while (!WebsocketConnected)
-					yield return null;
-				GameObject? Canvas = GameObject.Find("Canvas");
-				while (true) 
+				if (Canvas == null) 
 				{
-					if (Canvas == null) 
-					{
-						Canvas = GameObject.Find("Canvas").Find("SlotSelect");
-						yield return null;
-					}
-					else
-					{
-						break;
-					}
+					Canvas = GameObject.Find("Canvas");
 				}
-				GameObject? SlotSelect = Canvas.Find("SlotSelect");
-				while (true) 
+				else
 				{
-					if (SlotSelect == null) 
-					{
-						SlotSelect = Canvas.Find("SlotSelect");
-					}
-					else if (SlotSelect.activeSelf)
-					{
-						break;
-					}
-					yield return null;
+					break;
 				}
-				Log.LogInfo("Starting recording on OBS.");
-				Recording = true;
-				SPData.websocket.StartRecord();
+				yield return new WaitForEndOfFrame();
 			}
-			yield return null;
+			GameObject SlotSelect = Canvas.Find("SlotSelect");
+			while (true) 
+			{
+				if (SlotSelect == null) 
+				{
+					SlotSelect = Canvas.Find("SlotSelect");
+				}
+				else if (SlotSelect.activeSelf)
+				{
+					break;
+				}
+				yield return new WaitForEndOfFrame();
+			}
+			Log.LogInfo("Starting recording on OBS.");
+			Recording = true;
+			OBS.ObsWebsocket.StartRecording();
 		}
 	}
 	static class MenuHandlers 
@@ -231,20 +205,26 @@ namespace SpeedrunningUtils
 			string dir = $"{Paths.PluginPath}/SpeedrunningUtils.Splits";
 			if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 			string[] files = Directory.EnumerateFiles(dir).ToArray();
-			ButtonOption[] options = {};
+			ButtonOption[] options = [];
 			ButtonOption opt = new()
 			{
-				Id = $"tairasoul.speedrunningutils.splits.reconnect",
+				Id = $"tairasoul.speedrunningutils.livesplit.reconnect",
 				Text = "Reconnect to Livesplit",
-				Clicked = () =>
+				Clicked = Livesplit.StartSocket
+			};
+			ButtonOption obsopt = new() {
+				Id = "tairasoul.speedrunningutils.obs.reconnect",
+				Text = "Reconnect to OBS",
+				Clicked = () => 
 				{
-					Livesplit.StartSocket();
+					OBS.ObsWebsocket.Close();
+					OBS.ObsWebsocket.Connect();
 				}
 			};
-			options = options.Append(opt).ToArray();
+			options = [.. options, opt, obsopt];
 			foreach (string file in files) 
 			{
-				options = options.Append(CreateSplitButton(file)).ToArray();
+				options = [.. options, CreateSplitButton(file)];
 			}
 			return options;
 		}

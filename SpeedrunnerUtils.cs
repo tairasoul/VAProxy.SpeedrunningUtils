@@ -5,7 +5,6 @@ using System.Collections;
 using BepInEx;
 using System.Reflection;
 using UIWindowPageFramework;
-using ObsWebSocket.Net.Protocol.Requests;
 
 namespace SpeedrunningUtils
 {
@@ -84,9 +83,8 @@ namespace SpeedrunningUtils
 			Plugin.Log.LogInfo("SpeedrunnerUtils component awake.");
 			SceneManager.activeSceneChanged += OnSceneChanged;
 			if (Plugin.LastLoadedConfig.Value != "")
-			{
 				SplitLoader.LoadSplits($"{Paths.PluginPath}/SpeedrunningUtils.Splits/{Plugin.LastLoadedConfig.Value}");
-			}
+			OBS.ObsWebsocket.RecordingStopped += RecordingStopped;
 		}
 
 		private void OnSceneChanged(Scene old, Scene newS)
@@ -105,48 +103,12 @@ namespace SpeedrunningUtils
 		private IEnumerator ResetTimer() {
 			while (GameObject.FindFirstObjectByType<SaveSlotSelect>() == null)
 				yield return new WaitForEndOfFrame();
-			SaveSlotSelect select = GameObject.FindObjectOfType<SaveSlotSelect>();
 			ClearSlotData(Plugin.CurrentSaveSlot);
-			PlayerPrefs.SetFloat("GameTime" + Plugin.CurrentSaveSlot, 0f);
-			select.slots[Plugin.CurrentSaveSlot].Check();
 		}
 
 		private static void ClearSlotData(int ID)
 		{
-			GameObject canvas = GameObject.Find("Canvas");
-			GameObject slotSelect = canvas.transform.Find("SlotSelect").gameObject;
-			GameObject scrollView = slotSelect.transform.Find("Scroll View").gameObject;
-			GameObject viewport = scrollView.transform.Find("Viewport").gameObject;
-			GameObject content = viewport.transform.Find("Content").gameObject;
-
-			SaveSlotSelect select = content.GetComponent<SaveSlotSelect>();
-			string[] items = select.items;
-			for (int i = 0; i < items.Length; i++)
-			{
-				PlayerPrefs.SetInt(items[i] + ID, 0);
-				PlayerPrefs.SetInt(items[i] + "_Chip1" + ID, 0);
-				PlayerPrefs.SetInt(items[i] + "__" + ID, 0);
-				PlayerPrefs.SetInt(items[i] + "___" + ID, 0);
-			}
 			PlayerPrefs.SetInt("fresh" + ID, 0);
-			PlayerPrefs.SetString("Dialogue" + ID, null);
-			PlayerPrefs.SetInt("Memories" + ID, 0);
-			PlayerPrefs.SetInt("CS" + ID, 0);
-			PlayerPrefs.SetInt("DroneGun" + ID, 0);
-			PlayerPrefs.SetInt("DroneGunS2" + ID, 0);
-			PlayerPrefs.SetInt("S1" + ID, 0);
-			PlayerPrefs.SetInt("stamina" + ID, 0);
-			PlayerPrefs.SetInt("Progress" + ID, 0);
-			PlayerPrefs.SetInt("ui" + ID, 0);
-			PlayerPrefs.SetInt("Scanner" + ID, 0);
-			PlayerPrefs.SetInt("Compass" + ID, 0);
-			PlayerPrefs.SetInt("coreDash" + ID, 0);
-			PlayerPrefs.SetInt("glitch" + ID, 0);
-			PlayerPrefs.SetInt("W1" + ID, 0);
-			PlayerPrefs.SetInt("W2" + ID, 0);
-			PlayerPrefs.SetInt("Dress" + ID, 0);
-			PlayerPrefs.SetFloat("GameTime" + ID, 0f);
-			PlayerPrefs.SetInt("Timer" + ID, 0);
 		}
 
 		private async Task Update()
@@ -234,9 +196,13 @@ namespace SpeedrunningUtils
 			if (Plugin.Recording) 
 			{
 				Plugin.Recording = false;
-				StopRecordResponse resp = await SPData.websocket.StopRecord();
-				Plugin.Log.LogInfo($"Saved new recording. Filename: {resp.OutputPath}");
+				OBS.ObsWebsocket.StopRecording();
 			}
+		}
+		
+		internal void RecordingStopped(string output) 
+		{
+			Plugin.Log.LogInfo($"Recording stopped, output path {output}");
 		}
 	}
 
