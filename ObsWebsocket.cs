@@ -125,7 +125,7 @@ public static class ObsWebsocket
 		}
 	}
 	
-	internal static void StartRecording() 
+	public static void StartRecording() 
 	{
 		Request request = new()
 		{
@@ -141,7 +141,7 @@ public static class ObsWebsocket
 		clientSocket.SendAsync(json);
 	}
 	
-	internal static void StopRecording() 
+	public static void StopRecording() 
 	{
 		Request request = new()
 		{
