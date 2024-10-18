@@ -17,7 +17,7 @@ namespace SpeedrunningUtils
 	{
 		internal const string GUID = "tairasoul.vaproxy.speedrunning";
 		internal const string Name = "SpeedrunningUtils";
-		internal const string Version = "3.2.8";
+		internal const string Version = "3.2.9";
 	}
 
 	[BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
