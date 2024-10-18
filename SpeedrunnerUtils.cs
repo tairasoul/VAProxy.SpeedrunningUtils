@@ -103,12 +103,9 @@ namespace SpeedrunningUtils
 		private IEnumerator ResetTimer() {
 			while (GameObject.FindFirstObjectByType<SaveSlotSelect>() == null)
 				yield return new WaitForEndOfFrame();
-			ClearSlotData(Plugin.CurrentSaveSlot);
-		}
-
-		private static void ClearSlotData(int ID)
-		{
-			PlayerPrefs.SetInt("fresh" + ID, 0);
+			SaveSlotSelect select = GameObject.FindFirstObjectByType<SaveSlotSelect>();
+			select.currentSlot = Plugin.CurrentSaveSlot;
+			select.ClearSlotData();
 		}
 
 		private async Task Update()
