@@ -84,7 +84,6 @@ namespace SpeedrunningUtils
 			cfg = Config;
 			VisualizeHitboxesByDefault = cfg.Bind("Speedrunning", "Visualise split bounds by default", true, "Should a split's bounds be visualised by default?");
 			LastLoadedConfig = cfg.Bind("Speedrunning", "Last loaded config", "", "The config last loaded by SpeedrunningUtils.");
-			SetLayout = cfg.Bind("Speedrunning", "Set Layout", false, "Should SpeedrunningUtils forcibly set the layout where specified?");
 			RestartKey = cfg.Bind("Keybinds", "Restart keybind", new KeyboardShortcut(KeyCode.P), "Keybind to restart from the beginning of the game.");
 			EnableOBSWebsocket = cfg.Bind("OBS Integration", "Enable", false, "Enable OBS integration. Starts recording when you enter the save menu, stops 3 seconds after the run ends.");
 			WebsocketPassword = cfg.Bind("OBS Integration", "Password", "", "The password for the OBS Websocket Server. Leave empty if no password.");
