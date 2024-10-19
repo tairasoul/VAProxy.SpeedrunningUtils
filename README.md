@@ -9,6 +9,18 @@ Also needs [VAProxy.PageFramework](https://github.com/tairasoul/VAProxy.PageFram
 
 If you want some pre-made configs, go to [SpeedrunConfigs repo](https://github.com/tairasoul/VAProxy.SpeedrunConfigs)
 
+## Mod overview
+
+SpeedrunningUtils is just a bunch of utils to make speedrunners' lives easier.
+
+This includes automatic splitting, OBS integration and quick resetting by keybind.
+
+Automatic splitting is enabled with no option to disable, as it is central to the mod.
+
+OBS integration is disabled by default, enable in BepInEx/config/tairasoul.vaproxy.speedrunning.cfg
+
+Quick reset keybind is "P" by default, loads you into the main menu and clears the data of whatever slot you were playing on.
+
 ## Changelog
 
 Changelog is at [SpeedrunningUtils/changelog.md](https://github.com/tairasoul/VAProxy.SpeedrunningUtils/blob/master/changelog.md)
@@ -37,10 +49,6 @@ Command is the command to send. Do not put this key-value pair in if you don't w
 The commands you can send are found [here](https://github.com/LiveSplit/LiveSplit/blob/master/src/LiveSplit.Core/Server/CommandServer.cs#L155).
 
 Each `case "string":` line represents a command. The text in quotes is the command.
-
-addToLayout means it will be added to your LiveSplit layout. This will replace whatever you have at that index with this split name.
-
-addToLayout defaults to false.
 
 Command defaults to not being anything.
 
