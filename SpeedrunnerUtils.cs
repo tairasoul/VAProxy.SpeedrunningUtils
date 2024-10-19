@@ -131,45 +131,14 @@ namespace SpeedrunningUtils
 				if (SplitIndex < splits.Length) 
 				{
 					CustomSplit split = splits[SplitIndex];
-					if (split.splitCondition != null)
+					if (split.Fulfilled())
 					{
-						bool splitFulfilled = split.splitCondition.Fulfilled();
-						if (split.splitBounds != null)
+						if (split.Command != null)
 						{
-							if (splitFulfilled && split.splitBounds.Value.Contains(GameObject.Find("S-105.1").transform.position))
-							{
-								if (split.Command != null)
-								{
-									Plugin.Log.LogInfo($"Executing command {split.Command} at split {split.SplitName}");
-									Livesplit.SendCommand(split.Command);
-								}
-								SplitIndex++;
-							}
+							Plugin.Log.LogInfo($"Executing command {split.Command} at split {split.SplitName}");
+							Livesplit.SendCommand(split.Command);
 						}
-						else
-						{
-							if (splitFulfilled)
-							{
-								if (split.Command != null)
-								{
-									Plugin.Log.LogInfo($"Executing command {split.Command} at split {split.SplitName}");
-									Livesplit.SendCommand(split.Command);
-								}
-								SplitIndex++;
-							}
-						}
-					}
-					else if (split.splitBounds != null)
-					{
-						if (split.splitBounds.Value.Contains(GameObject.Find("S-105.1").transform.position))
-						{
-							if (split.Command != null)
-							{
-								Plugin.Log.LogInfo($"Executing command {split.Command} at split {split.SplitName}");
-								Livesplit.SendCommand(split.Command);
-							}
-							SplitIndex++;
-						}
+						SplitIndex++;
 					}
 				}
 				else 
@@ -437,9 +406,8 @@ namespace SpeedrunningUtils
 						splitBounds = ParseBounds(split["splitBounds"]),
 						Command = (string)split["Command"]
 					};
-					List<CustomSplit> splitList = SpeedrunnerUtils.splits.ToList();
-					splitList.Add(spl);
-					SpeedrunnerUtils.splits = splitList.ToArray();
+					CustomSplit[] splitList = [.. SpeedrunnerUtils.splits, spl];
+					SpeedrunnerUtils.splits = splitList;
 					if (splitHere)
 						actualSplitIndex++;
 					Plugin.Log.LogInfo($"Loaded split {(string)split["SplitName"]}");
@@ -458,5 +426,20 @@ namespace SpeedrunningUtils
 		public Condition? splitCondition;
 		public string SplitName;
 		public string Command;
+		
+		private readonly bool BoundsFulfilled() 
+		{
+			return !splitBounds.HasValue || splitBounds.Value.Contains(GameObject.Find("S-105.1").transform.position);
+		}
+		
+		private readonly bool ConditionFulfilled() 
+		{
+			return splitCondition == null || splitCondition.Fulfilled();
+		}
+		
+		public readonly bool Fulfilled() 
+		{
+			return BoundsFulfilled() && ConditionFulfilled();
+		}
 	}
 }
