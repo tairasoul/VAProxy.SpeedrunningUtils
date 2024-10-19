@@ -46,7 +46,7 @@ Both are optional, and if left out with Command set, will instantly run that com
 
 Command is the command to send. Do not put this key-value pair in if you don't want to send anything.
 
-The commands you can send are found [here](https://github.com/LiveSplit/LiveSplit/blob/master/src/LiveSplit.Core/Server/CommandServer.cs#L155).
+The commands you can send are found [here](https://github.com/LiveSplit/LiveSplit/blob/master/src/LiveSplit.Core/Server/CommandServer.cs#L173).
 
 Each `case "string":` line represents a command. The text in quotes is the command.
 
