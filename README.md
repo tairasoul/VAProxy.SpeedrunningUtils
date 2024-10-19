@@ -42,6 +42,8 @@ Each split is formatted like this:
 
 splitBounds and splitCondition, once fulfilled, will send the command (or move on to the next split's conditions if not declared).
 
+Both are optional, and if left out with Command set, will instantly run that command and move onto the next split.
+
 Command is the command to send. Do not put this key-value pair in if you don't want to send anything.
 
 The commands you can send are found [here](https://github.com/LiveSplit/LiveSplit/blob/master/src/LiveSplit.Core/Server/CommandServer.cs#L155).
