@@ -35,9 +35,7 @@ Each split is formatted like this:
 {
   "SplitName": "name of split",
   "splitCondition": condition,
-  "skipCondition": condition,
   "splitBounds": bounds,
-  "skipBounds": bounds,
   "Command": "startorsplit"
 }
 ```
