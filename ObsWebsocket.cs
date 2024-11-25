@@ -73,10 +73,12 @@ public static class ObsWebsocket
 	static WatsonWsClient clientSocket;
 	internal static bool Identified = false;
 	private static bool FirstStart = true;
+	internal static bool SocketIsActive = false;
 	internal static event Action<string> RecordingStopped;
 
 	public static void StartSocket()
 	{
+		SocketIsActive = true;
 		clientSocket = new(Plugin.WebsocketURL.Value, Plugin.WebsocketPort.Value, false);
 		clientSocket.MessageReceived += MessageReceived;
 		clientSocket.ServerConnected += ServerConnected;
@@ -127,6 +129,8 @@ public static class ObsWebsocket
 	
 	public static void StartRecording() 
 	{
+		if (!SocketIsActive)
+			return;
 		Request request = new()
 		{
 			requestType = "StartRecord",
@@ -143,6 +147,8 @@ public static class ObsWebsocket
 	
 	public static void StopRecording() 
 	{
+		if (!SocketIsActive)
+			return;
 		Request request = new()
 		{
 			requestType = "StopRecord",
