@@ -17,7 +17,7 @@ namespace SpeedrunningUtils
 	{
 		internal const string GUID = "tairasoul.vaproxy.speedrunning";
 		internal const string Name = "SpeedrunningUtils";
-		internal const string Version = "3.3.0";
+		internal const string Version = "3.3.1";
 	}
 
 	[BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
@@ -220,7 +220,15 @@ namespace SpeedrunningUtils
 					OBS.ObsWebsocket.Connect();
 				}
 			};
-			options = [.. options, opt, obsopt];
+			ButtonOption obsclose = new() {
+				Id = "tairasoul.speedrunningutils.obs.reconnect",
+				Text = "Close OBS socket",
+				Clicked = () => 
+				{
+					OBS.ObsWebsocket.Close();
+				}
+			};
+			options = [.. options, opt, obsopt, obsclose];
 			foreach (string file in files) 
 			{
 				options = [.. options, CreateSplitButton(file)];
