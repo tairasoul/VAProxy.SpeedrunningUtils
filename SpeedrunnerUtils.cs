@@ -110,7 +110,6 @@ namespace SpeedrunningUtils
 
 		private async Task Update()
 		{
-			Application.targetFrameRate = 99999;
 			if (Plugin.RestartKey.Value.IsDown())
 			{
 				if (!RestartKeyDown)
