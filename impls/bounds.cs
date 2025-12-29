@@ -10,16 +10,26 @@ record assoc(Bounds bounds, Action action);
 class BoundsRegistry : MonoBehaviour, IBoundsRegistry
 {
 	List<assoc> assocs = [];
+	internal LineRenderer renderer;
+
+	void Start() {
+		renderer = gameObject.AddComponent<LineRenderer>();
+    // if (!renderer.material)
+    // {
+    //   renderer.material = new Material(Shader.Find("Sprites/Default"));
+    // }
+		renderer.enabled = false;
+	}
 
 	public void BoundCreated(Bounds bounds)
 	{
-		Plugin.Log.LogInfo($"New bounds {bounds} created");
+		renderer.enabled = true;
 		GameObject s105 = GameObject.FindFirstObjectByType<Inventory>().gameObject;
 		bool lastContained = false;
 		assocs.Add(new(bounds, () =>
 		{
 			if (Plugin.cfg.VisualizeHitboxesByDefault.Value)
-				BoundVisualization.VisualizeBound(bounds);
+				BoundVisualization.VisualizeBound(bounds, renderer);
 			if (bounds.Contains(s105.transform.position)) {
 				if (!lastContained)
 				{
@@ -34,7 +44,14 @@ class BoundsRegistry : MonoBehaviour, IBoundsRegistry
 		}));
 	}
 
+	// float speed = 1f;
+
 	public void Update() {
+		// float hue = Mathf.Repeat(Time.time * speed, 1f);
+		// Color rainbowColor = Color.HSVToRGB(hue, 1f, 1f);
+
+		// renderer.startColor = rainbowColor;
+		// renderer.endColor = rainbowColor;
 		foreach (assoc assoc in assocs) {
 			assoc.action();
 		}
@@ -48,5 +65,7 @@ class BoundsRegistry : MonoBehaviour, IBoundsRegistry
 				break;
 			}
 		}
+		if (assocs.Count == 0)
+			renderer.enabled = false;
 	}
 }
