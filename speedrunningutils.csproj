@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>speedrunningutils</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>13</LangVersion>
+    <DefineConstants>PUBLIC_EVENTBUS</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CleanupBuildOutput>true</CleanupBuildOutput>
+    <EmbedDependencyList>true</EmbedDependencyList>
+    <DependencyEmbeds>Antlr4.Runtime.Standard;WatsonWebsocket;Newtonsoft.Json</DependencyEmbeds>
+  </PropertyGroup>
+  <Import Project="../../Common/tairasoul.unity.common/shared_projects/csproj_util.csproj" Label="Shared" />
+  <Import Project="../../Common/tairasoul.unity.common/shared_projects/deploader.projitems" Label="Shared" />
+  <Import Project="../../Common/tairasoul.unity.common/shared_projects/events.projitems" Label="Shared" />
+  <Import Project="../../Common/tairasoul.unity.common/shared_projects/hashing.projitems" Label="Shared" />
+  <Import Project="../../Common/tairasoul.unity.common/shared_projects/speedrunning.projitems" Label="Shared" />
+  <Import Project="../../Common/tairasoul.unity.common/shared_projects/util.projitems" Label="Shared" />
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>../vap-gamefolder/VA-Proxy_Data\Managed\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>../vap-gamefolder/VA-Proxy_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath>../vap-gamefolder\BepInEx\core\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="MainMenuSettings">
+      <HintPath>../Dlls/MainMenuSettings.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine">
+      <HintPath>../vap-gamefolder/VA-Proxy_Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AnimationModule">
+      <HintPath>../vap-gamefolder/VA-Proxy_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>../vap-gamefolder/VA-Proxy_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>../vap-gamefolder/VA-Proxy_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>../vap-gamefolder/VA-Proxy_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>../vap-gamefolder/VA-Proxy_Data\Managed\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIElementsModule">
+      <HintPath>../vap-gamefolder/VA-Proxy_Data\Managed\UnityEngine.UIElementsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIElementsNativeModule">
+      <HintPath>../vap-gamefolder/VA-Proxy_Data\Managed\UnityEngine.UIElementsNativeModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>../vap-gamefolder/VA-Proxy_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityCurlModule">
+      <HintPath>../vap-gamefolder/VA-Proxy_Data\Managed\UnityEngine.UnityCurlModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestAssetBundleModule">
+      <HintPath>../vap-gamefolder/VA-Proxy_Data\Managed\UnityEngine.UnityWebRequestAssetBundleModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestAudioModule">
+      <HintPath>../vap-gamefolder/VA-Proxy_Data\Managed\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestModule">
+      <HintPath>../vap-gamefolder/VA-Proxy_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestTextureModule">
+      <HintPath>../vap-gamefolder/VA-Proxy_Data\Managed\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestWWWModule">
+      <HintPath>../vap-gamefolder/VA-Proxy_Data\Managed\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
+    </Reference>
+    <Reference Include="0Harmony">
+        <HintPath>../vap-gamefolder/BepInEx/core/0Harmony.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="old/**/*.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
+    <PackageReference Include="WatsonWebsocket" Version="4.1.2" />
+    <PackageReference Include="Newtonsoft.JSON" Version="13.0.3" />
+  </ItemGroup>
+</Project>

@@ -1,5 +1,5 @@
 bin
 obj
-SpeedrunningUtils
-SpeedrunningUtils.tar.xz
-SpeedrunningUtils.dll
+old/
+core/dsl/grammar/.antlr
+core/dsl/antlr4-impl
