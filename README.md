@@ -4,7 +4,7 @@ Simple speedrunning utils for VA Proxy.
 
 Also needs [VAProxy.MainMenuSettings](https://github.com/tairasoul/VAProxy.MainMenuSettings) to integrate into the actual game UI for settings.
 
-If you want some pre-made configs, go to [SpeedrunConfigs repo](https://github.com/tairasoul/VAProxy.SpeedrunConfigs)
+~~If you want some pre-made configs, go to [SpeedrunConfigs repo](https://github.com/tairasoul/VAProxy.SpeedrunConfigs)~~ After migration to SRD, SpeedrunConfigs repo is outdated. It only contains .json files for version 3.
 
 Splitting functionality is provided by [tairasoul.unity.common/speedrunning](https://github.com/tairasoul/tairasoul.unity.common/tree/main/speedrunning/)
 
