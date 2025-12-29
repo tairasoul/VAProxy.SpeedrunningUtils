@@ -101,6 +101,15 @@ class Plugin : BaseUnityPlugin {
 				restartKeyDown = true;
 				SceneManager.LoadScene(1, LoadSceneMode.Single);
 				RuntimeInterface.Reset();
+				int saveSlot = PlayerPrefs.GetInt("Slot");
+				Task.Run(async () =>
+				{
+					while (GameObject.FindFirstObjectByType<SaveSlotSelect>() == null)
+						await Task.Delay(100);
+					var select = GameObject.FindFirstObjectByType<SaveSlotSelect>();
+					select.currentSlot = saveSlot;
+					select.ClearSlotData();
+				});
 			}
 		}
 		else

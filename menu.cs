@@ -16,7 +16,11 @@ static class MenuImpl {
 		{
 			Id = "tairasoul.speedrunningutils.livesplit.reconnect",
 			Text = "Reconnect to Livesplit",
-			Clicked = RuntimeInterface.livesplitInstance.Connect
+			Clicked = async () => {
+				RuntimeInterface.livesplitInstance.Disconnect();
+				await Task.Delay(50);
+				RuntimeInterface.livesplitInstance.Connect();
+			}
 		});
 		options.Add(new()
 		{
@@ -27,11 +31,11 @@ static class MenuImpl {
 				Plugin.obs.Connect();
 			}
 		});
-		options.Add(new() {
-			Id = "tairasoul.speedrunningutils.obs.reconnect",
-			Text = "Close OBS socket",
-			Clicked = Plugin.obs.Close
-		});
+		// options.Add(new() {
+			// Id = "tairasoul.speedrunningutils.obs.reconnect",
+			// Text = "Close OBS socket",
+			// Clicked = Plugin.obs.Close
+		// });
 		foreach (FileEntry entry in Flatten(files)) {
 			options.Add(CreateFileButton(entry));
 		}
@@ -62,7 +66,7 @@ static class MenuImpl {
 			}
 			else {
 				foreach (FileEntry item in Flatten(entry.entries))
-					entries.Add(entry);
+					entries.Add(item);
 			}
 		}
 		return entries;
