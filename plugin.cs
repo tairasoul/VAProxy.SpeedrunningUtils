@@ -36,6 +36,8 @@ class Plugin : BaseUnityPlugin {
 		EmbeddedDependencyLoader.Init(AppDomain.CurrentDomain, "speedrunningutils", ["Newtonsoft.Json", "WatsonWebsocket"]);
 	}
 
+	bool restartKeyDown = false;
+
 	public void Start() {
 		Log = Logger;
 		cfg = new(Config);
@@ -81,5 +83,21 @@ class Plugin : BaseUnityPlugin {
 				RuntimeInterface.GameStarted();
 			}
 		};
+	}
+
+	void Update() {
+		if (cfg.RestartKey.Value.IsDown())
+		{
+			if (!restartKeyDown)
+			{
+				restartKeyDown = true;
+				SceneManager.LoadScene(1, LoadSceneMode.Single);
+				RuntimeInterface.Reset();
+			}
+		}
+		else
+		{
+			restartKeyDown = false;
+		}
 	}
 }
