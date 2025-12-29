@@ -35,3 +35,9 @@ Game-agnostic syntax reference is located at [tairasoul.unity.common/speedrunnin
 ItemPickup [name, amount, total]
 
 Occurs on item pickup.
+
+SceneChange [id]
+
+Fired whenever scene is changed.
+
+Index 1 is the menu, index 2 is the main game.

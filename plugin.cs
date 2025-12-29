@@ -85,8 +85,15 @@ class Plugin : BaseUnityPlugin {
 		if (cfg.LastLoadedConfig.Value != "")
 			RuntimeInterface.Load(cfg.LastLoadedConfig.Value);
 		SceneManager.activeSceneChanged += (old, _new) => {
-			if (_new.buildIndex == 2) {
-				RuntimeInterface.GameStarted();
+			if (!RuntimeInterface.behaviour.IsActive)
+			{
+				if (_new.buildIndex == 2)
+				{
+					RuntimeInterface.GameStarted();
+				}
+			}
+			else {
+				EventBus.Send(new DslId("SceneChange"), new DslData([_new.buildIndex]));
 			}
 		};
 	}
