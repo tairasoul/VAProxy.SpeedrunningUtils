@@ -13,6 +13,7 @@ class BoundsRegistry : MonoBehaviour, IBoundsRegistry
 
 	public void BoundCreated(Bounds bounds)
 	{
+		Plugin.Log.LogInfo($"New bounds {bounds} created");
 		GameObject s105 = GameObject.FindFirstObjectByType<Inventory>().gameObject;
 		bool lastContained = false;
 		assocs.Add(new(bounds, () =>
