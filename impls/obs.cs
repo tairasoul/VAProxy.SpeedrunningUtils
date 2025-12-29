@@ -152,18 +152,6 @@ class OBS {
 			identified = true;
 			return;
 		}
-		// if (msg.op == 7) 
-		// {
-			// Plugin.Log.LogInfo("Received request response.");
-			// JObject dataObj = (JObject)msg.d!;
-			// Response response = dataObj.ToObject<Response>();
-			// if (response.requestType == "StopRecord") 
-			// {
-				// Plugin.Log.LogInfo("Received response for StopRecord call.");
-				// JObject respData = (JObject)response.responseData!;
-				// StopRecordingResult result = respData.ToObject<StopRecordingResult>();
-			// }
-		// }
 	}
 	
 	void sendIdent(string? auth = null) 

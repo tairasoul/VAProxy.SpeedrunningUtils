@@ -11,6 +11,7 @@ using tairasoul.unity.common.speedrunning.dsl.eventbus;
 using tairasoul.unity.common.speedrunning.runtime;
 using tairasoul.unity.common.util;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace speedrunningutils;
 
@@ -75,5 +76,10 @@ class Plugin : BaseUnityPlugin {
 		MenuSettings.RegisterMod("SpeedrunningUtils", "tairasoul.vaproxy.speedrunningutils", opts);
 		if (cfg.LastLoadedConfig.Value != "")
 			RuntimeInterface.Load(cfg.LastLoadedConfig.Value);
+		SceneManager.activeSceneChanged += (old, _new) => {
+			if (_new.buildIndex == 2) {
+				RuntimeInterface.GameStarted();
+			}
+		};
 	}
 }
