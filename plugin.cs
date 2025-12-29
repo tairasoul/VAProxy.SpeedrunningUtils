@@ -2,12 +2,15 @@ using System.Reflection;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using Language.Lua;
 using MainMenuSettings;
 using speedrunningutils.impls;
 using tairasoul.unity.common.embedded;
 using tairasoul.unity.common.events;
 using tairasoul.unity.common.speedrunning.dsl.config;
 using tairasoul.unity.common.speedrunning.dsl.eventbus;
+using tairasoul.unity.common.speedrunning.dsl.internals;
+using tairasoul.unity.common.speedrunning.livesplit;
 using tairasoul.unity.common.speedrunning.runtime;
 using tairasoul.unity.common.util;
 using UnityEngine;
@@ -47,7 +50,12 @@ class Plugin : BaseUnityPlugin {
 		DontDestroyOnLoad(br);
 		DslCompilationConfig.BoundsRegistryClass = br.AddComponent<BoundsRegistry>();
 		EventTypeRegistry.Register("ItemPickup", [typeof(string), typeof(int), typeof(int)]);
-		RuntimeInterface.Setup("4.0.0", Path.Combine(Paths.PluginPath, "split-src"), Path.Combine(Paths.PluginPath, "split-build"));
+		ITimer timer;
+		if (cfg.UseTCP.Value)
+			timer = new LivesplitTCP();
+		else
+			timer = new Livesplit();
+		RuntimeInterface.Setup("4.0.0", Path.Combine(Paths.PluginPath, "split-src"), Path.Combine(Paths.PluginPath, "split-build"), timer);
 		if (cfg.EnableOBSWebsocket.Value)
 			EventBus.Listen(new DslFileCompleted(), "file-completed", (_) => {
 				Task.Run(async () =>

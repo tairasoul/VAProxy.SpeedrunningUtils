@@ -16,7 +16,7 @@ static class MenuImpl {
 		{
 			Id = "tairasoul.speedrunningutils.livesplit.reconnect",
 			Text = "Reconnect to Livesplit",
-			Clicked = RuntimeInterface.livesplitInstance.ConnectPipe
+			Clicked = RuntimeInterface.livesplitInstance.Connect
 		});
 		options.Add(new()
 		{

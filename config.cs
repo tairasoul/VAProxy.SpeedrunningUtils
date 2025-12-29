@@ -11,6 +11,7 @@ class Config {
 	internal ConfigEntry<string> WebsocketURL;
 	internal ConfigEntry<int> WebsocketPort;
 	internal ConfigEntry<bool> EnableOBSWebsocket;
+	internal ConfigEntry<bool> UseTCP;
 
 	public Config(ConfigFile file) {
 		VisualizeHitboxesByDefault = file.Bind("Speedrunning", "Visualise split bounds by default", true, "Should a split's bounds be visualised by default?");
@@ -20,5 +21,6 @@ class Config {
 		WebsocketPassword = file.Bind("OBS Integration", "Password", "", "The password for the OBS Websocket Server. Leave empty if no password.");
 		WebsocketURL = file.Bind("OBS Integration", "Websocket URL", "127.0.0.1", "The URL for the server. Leave empty if you haven't changed anything.");
 		WebsocketPort = file.Bind("OBS Integration", "Websocket Port", 4455, "The port the websocket server is listening on.");
+		UseTCP = file.Bind("Livesplit Socket", "Use TCP", true, "Should the socket use TCP instead of named pipes?");
 	}
 }
