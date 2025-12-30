@@ -8,6 +8,7 @@ using tairasoul.unity.common.embedded;
 using tairasoul.unity.common.events;
 using tairasoul.unity.common.speedrunning.dsl.config;
 using tairasoul.unity.common.speedrunning.dsl.eventbus;
+using tairasoul.unity.common.speedrunning.dsl.internals;
 using tairasoul.unity.common.speedrunning.livesplit;
 using tairasoul.unity.common.speedrunning.runtime;
 using tairasoul.unity.common.util;
@@ -16,7 +17,7 @@ using UnityEngine.SceneManagement;
 
 namespace speedrunningutils;
 
-[BepInPlugin("tairasoul.vaproxy.speedrunning", "SpeedrunningUtils", "4.0.1")]
+[BepInPlugin("tairasoul.vaproxy.speedrunning", "SpeedrunningUtils", "4.0.2")]
 class Plugin : BaseUnityPlugin {
 	internal static ManualLogSource Log = null!;
 	internal static Config cfg = null!;
@@ -53,7 +54,7 @@ class Plugin : BaseUnityPlugin {
 			timer = new LivesplitTCP();
 		else
 			timer = new Livesplit();
-		RuntimeInterface.Setup("4.0.1", Path.Combine(Paths.PluginPath, "split-src"), Path.Combine(Paths.PluginPath, "split-build"), timer);
+		RuntimeInterface.Setup("4.0.2", Path.Combine(Paths.PluginPath, "split-src"), Path.Combine(Paths.PluginPath, "split-build"), timer);
 		if (cfg.EnableOBSWebsocket.Value)
 			EventBus.Listen(new DslFileCompleted(), "file-completed", (_) => {
 				Task.Run(async () =>
