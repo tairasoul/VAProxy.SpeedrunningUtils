@@ -17,11 +17,12 @@ using UnityEngine.SceneManagement;
 
 namespace speedrunningutils;
 
-[BepInPlugin("tairasoul.vaproxy.speedrunning", "SpeedrunningUtils", "4.0.2")]
+[BepInPlugin("tairasoul.vaproxy.speedrunning", "SpeedrunningUtils", "4.0.3")]
 class Plugin : BaseUnityPlugin {
 	internal static ManualLogSource Log = null!;
 	internal static Config cfg = null!;
 	internal static OBS obs = null!;
+	BoundsRegistry registry = new();
 	Harmony harmony = new("tairasoul.vaproxy.speedrunning");
 
 	static Plugin() {
@@ -45,16 +46,19 @@ class Plugin : BaseUnityPlugin {
 		cfg = new(Config);
 		obs = new();
 		Task.Run(obs.Connect);
-		GameObject br = new("speedrunningutils.boundsregistry");
+		GameObject br = new("speedrunningutils.linerenderer");
 		DontDestroyOnLoad(br);
-		DslCompilationConfig.BoundsRegistryClass = br.AddComponent<BoundsRegistry>();
+		registry.renderer = br.AddComponent<LineRenderer>();
+		registry.renderer.enabled = false;
+		DslCompilationConfig.BoundsRegistryClass = registry;
 		EventTypeRegistry.Register("ItemPickup", [typeof(string), typeof(int), typeof(int)]);
+		EventTypeRegistry.Register("SceneChange", [typeof(int)]);
 		ITimer timer;
 		if (cfg.UseTCP.Value)
 			timer = new LivesplitTCP();
 		else
 			timer = new Livesplit();
-		RuntimeInterface.Setup("4.0.2", Path.Combine(Paths.PluginPath, "split-src"), Path.Combine(Paths.PluginPath, "split-build"), timer);
+		RuntimeInterface.Setup("4.0.3", Path.Combine(Paths.PluginPath, "split-src"), Path.Combine(Paths.PluginPath, "split-build"), timer);
 		if (cfg.EnableOBSWebsocket.Value)
 			EventBus.Listen(new DslFileCompleted(), "file-completed", (_) => {
 				Task.Run(async () =>

@@ -7,20 +7,11 @@ namespace speedrunningutils.impls;
 
 record assoc(Bounds bounds, Action action);
 
-class BoundsRegistry : MonoBehaviour, IBoundsRegistry
+class BoundsRegistry : IBoundsRegistry
 {
 	List<assoc> assocs = [];
 	internal LineRenderer renderer;
-
-	void Start() {
-		renderer = gameObject.AddComponent<LineRenderer>();
-    // if (!renderer.material)
-    // {
-    //   renderer.material = new Material(Shader.Find("Sprites/Default"));
-    // }
-		renderer.enabled = false;
-	}
-
+	
 	public void BoundCreated(Bounds bounds)
 	{
 		renderer.enabled = true;
@@ -46,7 +37,7 @@ class BoundsRegistry : MonoBehaviour, IBoundsRegistry
 
 	// float speed = 1f;
 
-	public void Update() {
+	public void CheckBounds() {
 		// float hue = Mathf.Repeat(Time.time * speed, 1f);
 		// Color rainbowColor = Color.HSVToRGB(hue, 1f, 1f);
 
