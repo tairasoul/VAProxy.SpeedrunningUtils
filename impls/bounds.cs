@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace speedrunningutils.impls;
 
-record assoc(Bounds bounds, Action action);
+record assoc(BoundsPtrWrapper bounds, Action action);
 
 class BoundsRegistry : IBoundsRegistry
 {
