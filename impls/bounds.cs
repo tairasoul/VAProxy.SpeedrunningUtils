@@ -1,6 +1,7 @@
 using tairasoul.unity.common.events;
 using tairasoul.unity.common.speedrunning.dsl;
 using tairasoul.unity.common.speedrunning.dsl.eventbus;
+using tairasoul.unity.common.speedrunning.dsl.internals;
 using UnityEngine;
 
 namespace speedrunningutils.impls;
@@ -12,7 +13,7 @@ class BoundsRegistry : IBoundsRegistry
 	List<assoc> assocs = [];
 	internal LineRenderer renderer;
 	
-	public void BoundCreated(Bounds bounds)
+	public void BoundCreated(BoundsPtrWrapper bounds)
 	{
 		renderer.enabled = true;
 		GameObject s105 = GameObject.FindFirstObjectByType<Inventory>().gameObject;
@@ -21,7 +22,7 @@ class BoundsRegistry : IBoundsRegistry
 		{
 			if (Plugin.cfg.VisualizeHitboxesByDefault.Value)
 				BoundVisualization.VisualizeBound(bounds, renderer);
-			if (bounds.Contains(s105.transform.position)) {
+			if (bounds.bounds.Contains(s105.transform.position)) {
 				if (!lastContained)
 				{
 					lastContained = true;
@@ -48,7 +49,7 @@ class BoundsRegistry : IBoundsRegistry
 		}
 	}
 
-	public void BoundDestroyed(Bounds bounds)
+	public void BoundDestroyed(BoundsPtrWrapper bounds)
 	{
 		foreach (assoc assoc in assocs) {
 			if (assoc.bounds == bounds) {
