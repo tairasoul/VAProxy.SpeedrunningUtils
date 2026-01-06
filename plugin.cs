@@ -16,7 +16,11 @@ using UnityEngine.SceneManagement;
 
 namespace speedrunningutils;
 
-[BepInPlugin("tairasoul.vaproxy.speedrunning", "SpeedrunningUtils", "4.0.5")]
+static class VerInfo {
+	public const string PluginVer = "4.0.6";
+}
+
+[BepInPlugin("tairasoul.vaproxy.speedrunning", "SpeedrunningUtils", VerInfo.PluginVer)]
 class Plugin : BaseUnityPlugin {
 	internal static ManualLogSource Log = null!;
 	internal static Config cfg = null!;
@@ -58,7 +62,7 @@ class Plugin : BaseUnityPlugin {
 			timer = new LivesplitTCP();
 		else
 			timer = new LivesplitPipe();
-		RuntimeInterface.Setup("4.0.5", Path.Combine(Paths.PluginPath, "split-src"), Path.Combine(Paths.PluginPath, "split-build"), timer);
+		RuntimeInterface.Setup(VerInfo.PluginVer, Path.Combine(Paths.PluginPath, "split-src"), Path.Combine(Paths.PluginPath, "split-build"), timer);
 		if (cfg.EnableOBSWebsocket.Value)
 			EventBus.Listen(new DslFileCompleted(), "file-completed", (_) => {
 				Task.Run(async () =>
