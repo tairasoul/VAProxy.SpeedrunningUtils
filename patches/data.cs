@@ -13,4 +13,11 @@ static class DataPatches {
 		int valAfter = __instance.value[ind];
 		EventBus.Send(new DslId("ItemPickup"), new DslData([name, val, valAfter]));
 	}
+
+	[HarmonyPatch(nameof(DATA.AddWeapon))]
+	[HarmonyPostfix]
+	static void AddWeaponEvent(DATA __instance, int __0) {
+		string name = __instance.items[__0];
+		EventBus.Send(new DslId("ItemPickup"), new DslData([name, 1, 1]));
+	}
 }
